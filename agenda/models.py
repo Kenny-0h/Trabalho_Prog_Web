@@ -1,4 +1,3 @@
-
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -72,4 +71,70 @@ class Disponibilidade(models.Model):
         return (
             f"{self.agenda} - {self.get_dia_semana_display()} "
             f"({self.horario_inicio} às {self.horario_fim})"
+        )
+
+
+class BloqueioAgenda(models.Model):
+    class Status(models.TextChoices):
+        PENDENTE = "PENDENTE", "Pendente"
+        APROVADO = "APROVADO", "Aprovado"
+        REJEITADO = "REJEITADO", "Rejeitado"
+
+    class Tipo(models.TextChoices):
+        OUTRO = "OUTRO", "Outro"
+        AUSENCIA = "AUSENCIA", "Ausência"
+        FERIAS = "FERIAS", "Férias"
+
+    agenda = models.ForeignKey(
+        Agenda,
+        on_delete=models.CASCADE,
+        related_name="bloqueios",
+    )
+    data_hora_inicio = models.DateTimeField(
+        verbose_name="Data e horário de início",
+    )
+    data_hora_fim = models.DateTimeField(
+        verbose_name="Data e horário de fim",
+    )
+    justificativa = models.TextField()
+    tipo = models.CharField(
+        max_length=20,
+        choices=Tipo.choices,
+        default=Tipo.OUTRO,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDENTE,
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["data_hora_inicio"]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(data_hora_fim__gt=models.F("data_hora_inicio")),
+                name="bloqueio_periodo_valido",
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+
+        if (
+                self.data_hora_inicio
+                and self.data_hora_fim
+                and self.data_hora_fim <= self.data_hora_inicio
+        ):
+            from django.core.exceptions import ValidationError
+
+            raise ValidationError({
+                "data_hora_fim": "O fim deve ser posterior ao início."
+            })
+
+    def __str__(self):
+        return (
+            f"Bloqueio de {self.agenda} "
+            f"({self.data_hora_inicio:%d/%m/%Y %H:%M} "
+            f"até {self.data_hora_fim:%d/%m/%Y %H:%M})"
         )
