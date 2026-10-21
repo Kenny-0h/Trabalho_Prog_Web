@@ -522,8 +522,8 @@ A aplicação deverá estar concluída, contemplando os requisitos definidos no 
 * [x] Definição da modelagem conceitual
 * [x] Definição da arquitetura Django
 * [x] Definição inicial da estratégia de branches
-* [ ] Criação do projeto Django
-* [ ] Configuração do ambiente de desenvolvimento
+* [x] Criação do projeto Django
+* [X] Configuração do ambiente de desenvolvimento
 * [ ] Configuração do banco de dados
 * [ ] Implementação dos usuários
 * [ ] Implementação das agendas
