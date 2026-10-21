@@ -1,10 +1,11 @@
-from datetime import date, time
+from datetime import date, time, datetime
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
+from django.utils import timezone
 
-from agenda.models import Agenda, Disponibilidade, Especialidade
+from agenda.models import Agenda, BloqueioAgenda, Disponibilidade, Especialidade
 from usuarios.models import Medico, Usuario
 
 
@@ -110,3 +111,116 @@ class AgendaDisponibilidadeTest(TestCase):
                     horario_inicio=time(8, 0),
                     horario_fim=time(12, 0),
                 )
+
+
+class BloqueioAgendaTest(TestCase):
+    def setUp(self):
+        self.especialidade = Especialidade.objects.create(
+            nome="Cardiologia",
+            tempo_medio_consulta=30,
+        )
+
+        usuario = Usuario.objects.create_user(
+            username="medico_bloqueio",
+            password="SenhaTeste@123",
+            cpf="12345678904",
+            nome="Médico de bloqueio",
+            endereco="Rua de teste, 123",
+            telefone="35999990000",
+            data_nascimento=date(1980, 1, 1),
+            tipo_usuario=Usuario.TipoUsuario.MEDICO,
+        )
+
+        self.medico = Medico.objects.create(
+            usuario=usuario,
+            crm="CRM-MG-789",
+            especialidade=self.especialidade,
+        )
+        self.agenda = Agenda.objects.create(medico=self.medico)
+
+        self.inicio = timezone.make_aware(
+            datetime(2026, 11, 10, 9, 0)
+        )
+        self.fim = timezone.make_aware(
+            datetime(2026, 11, 10, 12, 0)
+        )
+
+    def criar_bloqueio(self, **kwargs):
+        dados = {
+            "agenda": self.agenda,
+            "data_hora_inicio": self.inicio,
+            "data_hora_fim": self.fim,
+            "justificativa": "Compromisso pessoal",
+        }
+        dados.update(kwargs)
+        return BloqueioAgenda.objects.create(**dados)
+
+    def test_bloqueio_e_criado_com_status_pendente(self):
+        bloqueio = self.criar_bloqueio()
+
+        self.assertEqual(bloqueio.status, BloqueioAgenda.Status.PENDENTE)
+        self.assertEqual(bloqueio.agenda, self.agenda)
+        self.assertEqual(bloqueio.justificativa, "Compromisso pessoal")
+
+    def test_status_previstos_estao_definidos(self):
+        status_previstos = {
+            "PENDENTE",
+            "APROVADO",
+            "REJEITADO",
+        }
+        status_modelo = {
+            escolha for escolha, _ in BloqueioAgenda.Status.choices
+        }
+
+        self.assertSetEqual(status_modelo, status_previstos)
+
+    def test_tipos_previstos_estao_definidos(self):
+        tipos_previstos = {"OUTRO", "AUSENCIA", "FERIAS"}
+        tipos_modelo = {
+            escolha for escolha, _ in BloqueioAgenda.Tipo.choices
+        }
+
+        self.assertSetEqual(tipos_modelo, tipos_previstos)
+
+    def test_aceita_bloqueio_valido(self):
+        bloqueio = BloqueioAgenda(
+            agenda=self.agenda,
+            data_hora_inicio=self.inicio,
+            data_hora_fim=self.fim,
+            justificativa="Férias",
+            tipo=BloqueioAgenda.Tipo.FERIAS,
+        )
+
+        bloqueio.full_clean()
+        bloqueio.save()
+
+        self.assertEqual(self.agenda.bloqueios.count(), 1)
+
+    def test_rejeita_periodo_com_fim_igual_ao_inicio(self):
+        bloqueio = BloqueioAgenda(
+            agenda=self.agenda,
+            data_hora_inicio=self.inicio,
+            data_hora_fim=self.inicio,
+            justificativa="Período inválido",
+        )
+
+        with self.assertRaises(ValidationError):
+            bloqueio.full_clean()
+
+    def test_banco_impede_periodo_invalido(self):
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                self.criar_bloqueio(
+                    data_hora_fim=self.inicio,
+                )
+
+    def test_aceita_bloqueio_que_atravessa_dias(self):
+        fim = timezone.make_aware(
+            datetime(2026, 11, 11, 12, 0)
+        )
+        bloqueio = self.criar_bloqueio(data_hora_fim=fim)
+
+        self.assertGreater(
+            bloqueio.data_hora_fim,
+            bloqueio.data_hora_inicio,
+        )
