@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from agenda.models import Especialidade
-from atendimento.models import Consulta
+from atendimento.models import Consulta, Prontuario, Exame, Receita
 from usuarios.models import Medico, Paciente, Usuario
 
 
@@ -132,3 +132,109 @@ class ConsultaTest(TestCase):
             "especialidade",
             [campo.name for campo in Consulta._meta.fields],
         )
+
+
+class ProntuarioExameReceitaTest(TestCase):
+    def setUp(self):
+        self.especialidade = Especialidade.objects.create(
+            nome="Cardiologia",
+            tempo_medio_consulta=30,
+        )
+
+        usuario_medico = Usuario.objects.create_user(
+            username="medico_prontuario",
+            password="SenhaTeste@123",
+            cpf="12345678911",
+            nome="Médico de prontuário",
+            endereco="Rua de teste, 123",
+            telefone="35999990011",
+            data_nascimento=date(1980, 1, 1),
+            tipo_usuario=Usuario.TipoUsuario.MEDICO,
+        )
+        self.medico = Medico.objects.create(
+            usuario=usuario_medico,
+            crm="CRM-MG-789",
+            especialidade=self.especialidade,
+        )
+
+        usuario_paciente = Usuario.objects.create_user(
+            username="paciente_prontuario",
+            password="SenhaTeste@123",
+            cpf="12345678912",
+            nome="Paciente de prontuário",
+            endereco="Rua de teste, 456",
+            telefone="35999990012",
+            data_nascimento=date(1990, 1, 1),
+            tipo_usuario=Usuario.TipoUsuario.PACIENTE,
+        )
+        self.paciente = Paciente.objects.create(
+            usuario=usuario_paciente,
+        )
+
+        self.consulta = Consulta.objects.create(
+            medico=self.medico,
+            paciente=self.paciente,
+            data_hora=timezone.make_aware(
+                datetime(2026, 11, 10, 9, 0)
+            ),
+        )
+
+    def test_consulta_pode_existir_sem_prontuario(self):
+        self.assertFalse(hasattr(self.consulta, "prontuario"))
+
+    def test_prontuario_pertence_a_uma_consulta(self):
+        prontuario = Prontuario.objects.create(
+            consulta=self.consulta,
+            anamnese="Paciente relata dor de cabeça.",
+            diagnostico="Em avaliação.",
+        )
+
+        self.assertEqual(prontuario.consulta, self.consulta)
+        self.assertEqual(self.consulta.prontuario, prontuario)
+
+    def test_consulta_nao_pode_ter_dois_prontuarios(self):
+        Prontuario.objects.create(consulta=self.consulta)
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Prontuario.objects.create(consulta=self.consulta)
+
+    def test_prontuario_pode_ter_varios_exames(self):
+        prontuario = Prontuario.objects.create(
+            consulta=self.consulta,
+        )
+
+        Exame.objects.create(
+            prontuario=prontuario,
+            nome="Hemograma",
+        )
+        Exame.objects.create(
+            prontuario=prontuario,
+            nome="Eletrocardiograma",
+        )
+
+        self.assertEqual(prontuario.exames.count(), 2)
+
+    def test_prontuario_pode_ter_varias_receitas(self):
+        prontuario = Prontuario.objects.create(
+            consulta=self.consulta,
+        )
+
+        Receita.objects.create(
+            prontuario=prontuario,
+            descricao="Receita de teste 1",
+        )
+        Receita.objects.create(
+            prontuario=prontuario,
+            descricao="Receita de teste 2",
+        )
+
+        self.assertEqual(prontuario.receitas.count(), 2)
+
+    def test_medico_e_paciente_sao_acessados_pela_consulta(self):
+        prontuario = Prontuario.objects.create(
+            consulta=self.consulta,
+        )
+
+        self.assertEqual(prontuario.consulta.medico, self.medico)
+        self.assertEqual(prontuario.consulta.paciente, self.paciente)
