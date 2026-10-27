@@ -112,6 +112,70 @@ class AgendaDisponibilidadeTest(TestCase):
                     horario_fim=time(12, 0),
                 )
 
+    def test_nao_permite_horarios_sobrepostos(self):
+        Disponibilidade.objects.create(
+            agenda=self.agenda,
+            dia_semana=Disponibilidade.DiaSemana.SEGUNDA,
+            horario_inicio=time(8, 0),
+            horario_fim=time(12, 0),
+        )
+
+        casos_sobrepostos = [
+            (time(7, 0), time(9, 0)),  # Sobreposição no início
+            (time(11, 0), time(13, 0)),  # Sobreposição no fim
+            (time(9, 0), time(10, 0)),  # Intervalo contido
+            (time(7, 0), time(13, 0)),  # Intervalo que contém o existente
+        ]
+
+        for inicio, fim in casos_sobrepostos:
+            with self.subTest(inicio=inicio, fim=fim):
+                disponibilidade = Disponibilidade(
+                    agenda=self.agenda,
+                    dia_semana=Disponibilidade.DiaSemana.SEGUNDA,
+                    horario_inicio=inicio,
+                    horario_fim=fim,
+                )
+
+                with self.assertRaises(ValidationError):
+                    disponibilidade.full_clean()
+
+    def test_permite_horarios_consecutivos(self):
+        Disponibilidade.objects.create(
+            agenda=self.agenda,
+            dia_semana=Disponibilidade.DiaSemana.SEGUNDA,
+            horario_inicio=time(8, 0),
+            horario_fim=time(9, 0),
+        )
+
+        disponibilidade = Disponibilidade(
+            agenda=self.agenda,
+            dia_semana=Disponibilidade.DiaSemana.SEGUNDA,
+            horario_inicio=time(9, 0),
+            horario_fim=time(10, 0),
+        )
+
+        disponibilidade.full_clean()
+        disponibilidade.save()
+
+        self.assertEqual(self.agenda.disponibilidades.count(), 2)
+
+    def test_banco_rejeita_disponibilidade_sobreposta(self):
+        Disponibilidade.objects.create(
+            agenda=self.agenda,
+            dia_semana=Disponibilidade.DiaSemana.SEGUNDA,
+            horario_inicio=time(8, 0),
+            horario_fim=time(12, 0),
+        )
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Disponibilidade.objects.create(
+                    agenda=self.agenda,
+                    dia_semana=Disponibilidade.DiaSemana.SEGUNDA,
+                    horario_inicio=time(10, 0),
+                    horario_fim=time(14, 0),
+                )
+
 
 class BloqueioAgendaTest(TestCase):
     def setUp(self):

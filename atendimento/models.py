@@ -39,9 +39,9 @@ class Consulta(models.Model):
     def clean(self):
         super().clean()
 
-        if self.data_hora and self.data_hora.minute % 1 != 0:
+        if self.data_hora and self.data_hora.second != 0:
             raise ValidationError({
-                "data_hora": "Informe um horário válido."
+                "data_hora": "O horário não pode conter segundos."
             })
 
     def __str__(self):

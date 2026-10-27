@@ -115,6 +115,29 @@ class ModelagemUsuariosTest(TestCase):
         with self.assertRaises(ValidationError):
             usuario.full_clean()
 
+    def test_usuario_sem_perfil_nao_e_rejeitado_pelo_clean(self):
+        usuario = self.criar_usuario(
+            "12345678907",
+            Usuario.TipoUsuario.PACIENTE,
+            "paciente_sem_perfil",
+        )
+
+        # O usuário pode existir temporariamente sem perfil.
+        # A criação completa deve ser feita pelo serviço.
+        usuario.full_clean()
+
+    def test_usuario_nao_deve_ter_dois_perfis(self):
+        usuario = self.criar_usuario(
+            "12345678908",
+            Usuario.TipoUsuario.PACIENTE,
+            "paciente_dois_perfis",
+        )
+        Paciente.objects.create(usuario=usuario)
+        FuncionarioAdministrativo.objects.create(usuario=usuario)
+
+        with self.assertRaises(ValidationError):
+            usuario.full_clean()
+
 
 class ServicoCadastroTest(TestCase):
     def dados_usuario(self, tipo, username, cpf):
