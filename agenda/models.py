@@ -59,6 +59,9 @@ class Disponibilidade(models.Model):
         ]
 
     def clean(self):
+        from django.core.exceptions import ValidationError
+        from django.db.models import Q
+
         super().clean()
 
         if self.horario_inicio and self.horario_fim:
@@ -66,6 +69,29 @@ class Disponibilidade(models.Model):
                 raise ValidationError({
                     "horario_fim": "O horário final deve ser posterior ao inicial."
                 })
+
+        if (
+                self.agenda_id
+                and self.dia_semana is not None
+                and self.horario_inicio
+                and self.horario_fim
+                and self.horario_inicio < self.horario_fim
+        ):
+            conflitos = Disponibilidade.objects.filter(
+                agenda_id=self.agenda_id,
+                dia_semana=self.dia_semana,
+                horario_inicio__lt=self.horario_fim,
+                horario_fim__gt=self.horario_inicio,
+            )
+
+            if self.pk:
+                conflitos = conflitos.exclude(pk=self.pk)
+
+            if conflitos.exists():
+                raise ValidationError(
+                    "Este horário se sobrepõe a outra disponibilidade "
+                    "da mesma agenda no mesmo dia."
+                )
 
     def __str__(self):
         return (
