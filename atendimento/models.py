@@ -49,3 +49,45 @@ class Consulta(models.Model):
             f"Consulta de {self.paciente} com {self.medico} "
             f"em {self.data_hora:%d/%m/%Y %H:%M}"
         )
+
+
+class Prontuario(models.Model):
+    consulta = models.OneToOneField(
+        Consulta,
+        on_delete=models.PROTECT,
+        related_name="prontuario",
+    )
+    anamnese = models.TextField(blank=True)
+    diagnostico = models.TextField(blank=True)
+    observacoes = models.TextField(blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Prontuário da consulta {self.consulta_id}"
+
+
+class Exame(models.Model):
+    prontuario = models.ForeignKey(
+        Prontuario,
+        on_delete=models.CASCADE,
+        related_name="exames",
+    )
+    nome = models.CharField(max_length=100)
+    descricao = models.TextField(blank=True)
+    data_solicitacao = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return self.nome
+
+
+class Receita(models.Model):
+    prontuario = models.ForeignKey(
+        Prontuario,
+        on_delete=models.CASCADE,
+        related_name="receitas",
+    )
+    descricao = models.TextField()
+    data_emissao = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Receita do prontuário {self.prontuario_id}"
