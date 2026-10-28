@@ -29,6 +29,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -125,3 +126,22 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Clínica Médica",
+    "site_header": "Clínica Médica",
+    "site_brand": "Gestão Clínica",
+    "welcome_sign": "Bem-vindo ao sistema de gestão clínica",
+    "copyright": "Projeto de Programação Web",
+    "search_model": [
+        "usuarios.Usuario",
+        "agenda.Consulta",
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "order_with_respect_to": [
+        "usuarios",
+        "agenda",
+        "atendimento",
+    ],
+}
