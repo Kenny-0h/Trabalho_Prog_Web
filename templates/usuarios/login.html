@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Entrar{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-5">
+        <div class="card auth-card border-0 shadow-sm">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="medical-symbol medical-symbol-sm mx-auto mb-3">+</div>
+                    <h1 class="h3 fw-bold">Bem-vindo de volta</h1>
+                    <p class="text-body-secondary">Entre para continuar no AgendaMedica.</p>
+                </div>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">Nome de usuário</label>
+                        <input type="text" name="username" id="id_username" class="form-control{% if form.username.errors %} is-invalid{% endif %}" value="{{ form.username.value|default:'' }}" autocomplete="username" required autofocus>
+                        {% for error in form.username.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">Senha</label>
+                        <input type="password" name="password" id="id_password" class="form-control{% if form.password.errors %} is-invalid{% endif %}" autocomplete="current-password" required>
+                        {% for error in form.password.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+                    </div>
+                    <input type="hidden" name="next" value="{{ next }}">
+                    <button class="btn btn-primary btn-lg w-100 mt-2" type="submit">Entrar</button>
+                </form>
+                <p class="text-center text-body-secondary mt-4 mb-0">Ainda não tem conta? <a href="{% url 'cadastro' %}">Cadastre-se</a>.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Início{% endblock %}
+{% block content %}
+<section class="hero-panel rounded-4 p-4 p-md-5">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="badge text-bg-primary-subtle mb-3">Cuidado e organização em um só lugar</span>
+            <h1 class="display-5 fw-bold mb-3">Sua saúde merece uma agenda simples.</h1>
+            <p class="lead text-body-secondary mb-4">Consulte as informações da clínica e, em breve, gerencie seus agendamentos médicos com praticidade.</p>
+            {% if user.is_authenticated %}
+                <p class="mb-3">Você está conectado como <strong>{{ user.get_tipo_usuario_display }}</strong>.</p>
+                {% if user.is_staff %}
+                    <a class="btn btn-primary btn-lg" href="{% url 'admin:index' %}">Acessar administração</a>
+                {% else %}
+                    <span class="text-body-secondary">Sua área de paciente será disponibilizada nas próximas etapas.</span>
+                {% endif %}
+            {% else %}
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-primary btn-lg" href="{% url 'cadastro' %}">Criar minha conta</a>
+                    <a class="btn btn-outline-secondary btn-lg" href="{% url 'login' %}">Já tenho cadastro</a>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-lg-5">
+            <div class="hero-illustration text-center p-4 p-md-5 rounded-4">
+                <div class="medical-symbol" aria-hidden="true">+</div>
+                <h2 class="h4 mt-3 mb-2">AgendaMedica</h2>
+                <p class="text-body-secondary mb-0">Mais organização para cuidar melhor.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

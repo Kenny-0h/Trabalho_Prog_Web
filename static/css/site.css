@@ -1,0 +1,12 @@
+:root { --brand-color: #2563eb; --brand-soft: #eaf1ff; --surface-soft: #f5f8ff; }
+[data-bs-theme="dark"] { --brand-soft: #172b4d; --surface-soft: #17202d; }
+body { background: var(--bs-tertiary-bg); }
+.brand-mark { display: inline-grid; place-items: center; width: 1.65rem; height: 1.65rem; border-radius: .5rem; color: white; background: var(--brand-color); font-size: 1.35rem; line-height: 1; }
+.hero-panel { background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); }
+.hero-illustration { background: var(--surface-soft); min-height: 260px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.medical-symbol { display: grid; place-items: center; width: 6rem; height: 6rem; border-radius: 1.75rem; color: white; background: var(--brand-color); font-size: 5rem; font-weight: 300; line-height: 1; box-shadow: 0 1rem 2rem rgba(37, 99, 235, .2); }
+.medical-symbol-sm { width: 3.25rem; height: 3.25rem; border-radius: 1rem; font-size: 2.7rem; }
+.auth-card { border-radius: 1.25rem; background: var(--bs-body-bg); }
+.auth-card .form-control { min-height: 2.85rem; }
+.auth-card textarea.form-control { min-height: 6rem; }
+.btn-primary { --bs-btn-bg: var(--brand-color); --bs-btn-border-color: var(--brand-color); --bs-btn-hover-bg: #1d4ed8; --bs-btn-hover-border-color: #1d4ed8; }
