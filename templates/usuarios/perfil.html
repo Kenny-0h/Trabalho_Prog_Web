@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Meus Dados{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card p-4">
+            <h1 class="h4 mb-3">Meus Dados Cadastrais</h1>
+            <p class="text-body-secondary small mb-4">
+                Por segurança, seu CPF (<strong>{{ user.cpf }}</strong>), usuário (<strong>{{ user.username }}</strong>)
+                e perfil (<strong>{{ user.get_tipo_usuario_display }}</strong>) não podem ser alterados por esta tela.
+            </p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <a href="{% url 'inicio' %}" class="btn btn-outline-secondary">Voltar</a>
+                    <button type="submit" class="btn btn-primary">Salvar alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

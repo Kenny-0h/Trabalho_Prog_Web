@@ -1,27 +1,49 @@
 (() => {
-    const CHAVE_TEMA = "agendamedica-tema";
-    const temasDisponiveis = ["light", "dark"];
-    const raiz = document.documentElement;
-    const botao = document.getElementById("alternarTema");
-    const icone = document.getElementById("iconeTema");
-    const texto = document.getElementById("textoTema");
+    const STORAGE_KEY = "agendamedica-tema";
+    const DEFAULT_THEME = "light";
 
-    function aplicarTema(tema) {
-        const temaValido = temasDisponiveis.includes(tema) ? tema : "light";
-        raiz.setAttribute("data-bs-theme", temaValido);
-        localStorage.setItem(CHAVE_TEMA, temaValido);
-        if (icone && texto) {
-            icone.textContent = temaValido === "dark" ? "☀" : "☾";
-            texto.textContent = temaValido === "dark" ? "Tema claro" : "Tema escuro";
+    // Registro extensível de temas: adicionar um novo tema aqui habilita o ciclo automaticamente
+    const THEMES = {
+        light: {
+            next: "dark",
+            icon: "☾",
+            buttonLabel: "Tema escuro",
+        },
+        dark: {
+            next: "light",
+            icon: "☀",
+            buttonLabel: "Tema claro",
+        },
+    };
+
+    function getSavedTheme() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return THEMES[saved] ? saved : DEFAULT_THEME;
+    }
+
+    function applyTheme(themeName) {
+        const theme = THEMES[themeName] ? themeName : DEFAULT_THEME;
+        document.documentElement.setAttribute("data-bs-theme", theme);
+        localStorage.setItem(STORAGE_KEY, theme);
+
+        const iconEl = document.getElementById("iconeTema");
+        const textEl = document.getElementById("textoTema");
+        if (iconEl && textEl) {
+            iconEl.textContent = THEMES[theme].icon;
+            textEl.textContent = THEMES[theme].buttonLabel;
         }
     }
 
-    aplicarTema(localStorage.getItem(CHAVE_TEMA) || "light");
-    if (botao) {
-        botao.addEventListener("click", () => {
-            const atual = raiz.getAttribute("data-bs-theme") || "light";
-            const proximo = temasDisponiveis[(temasDisponiveis.indexOf(atual) + 1) % temasDisponiveis.length];
-            aplicarTema(proximo);
-        });
-    }
+    document.addEventListener("DOMContentLoaded", () => {
+        applyTheme(getSavedTheme());
+
+        const toggleBtn = document.getElementById("alternarTema");
+        if (toggleBtn) {
+            toggleBtn.addEventListener("click", () => {
+                const current = getSavedTheme();
+                const nextTheme = THEMES[current].next;
+                applyTheme(nextTheme);
+            });
+        }
+    });
 })();

@@ -128,14 +128,14 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 JAZZMIN_SETTINGS = {
-    "site_title": "Clínica Médica",
-    "site_header": "Clínica Médica",
+    "site_title": "AgendaMedica",
+    "site_header": "AgendaMedica",
     "site_brand": "Gestão Clínica",
-    "welcome_sign": "Bem-vindo ao sistema de gestão clínica",
-    "copyright": "Projeto de Programação Web",
+    "welcome_sign": "Bem-vindo ao painel administrativo AgendaMedica",
+    "copyright": "AgendaMedica - Projeto de Programação Web",
     "search_model": [
         "usuarios.Usuario",
-        "agenda.Consulta",
+        "atendimento.Consulta",
     ],
     "show_sidebar": True,
     "navigation_expanded": True,
@@ -145,7 +145,6 @@ JAZZMIN_SETTINGS = {
         "atendimento",
     ],
 }
-
 # URLs utilizadas pelo fluxo de autenticação da interface pública.
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "inicio"

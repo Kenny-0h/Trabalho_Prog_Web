@@ -13,6 +13,9 @@
         })();
     </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'css/themes/light.css' %}" rel="stylesheet">
+    <link href="{% static 'css/themes/dark.css' %}" rel="stylesheet">
+    <link href="{% static 'css/themes/custom.css' %}" rel="stylesheet">
     <link href="{% static 'css/site.css' %}" rel="stylesheet">
     {% block extra_css %}{% endblock %}
 </head>
@@ -26,6 +29,31 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarPrincipal">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inicio' %}">Início</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        {% if user.tipo_usuario == 'PACIENTE' %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'painel_paciente' %}">Meu Painel</a></li>
+                        {% elif user.tipo_usuario == 'MEDICO' %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'painel_medico' %}">Painel Médico</a></li>
+                        {% elif user.tipo_usuario == 'FUNCIONARIO' %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'painel_funcionario' %}">Recepção / Clínica</a></li>
+                        {% elif user.tipo_usuario == 'ADMINISTRADOR' %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'painel_administrador' %}">Administração</a></li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'meu_perfil' %}">Meus Dados</a>
+                        </li>
+                        {% if user.is_staff or user.is_superuser %}
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold" href="{% url 'admin:index' %}">Painel Admin</a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                     <li class="nav-item">
                         <button class="btn btn-outline-secondary btn-sm" id="alternarTema" type="button" aria-label="Alternar tema">
@@ -33,7 +61,12 @@
                         </button>
                     </li>
                     {% if user.is_authenticated %}
-                        <li class="nav-item"><span class="navbar-text">Olá, {{ user.nome|default:user.username }}</span></li>
+                        <li class="nav-item">
+                            <span class="navbar-text small">
+                                Olá, <strong>{{ user.nome|default:user.username }}</strong>
+                                <span class="badge text-bg-secondary ms-1">{{ user.get_tipo_usuario_display }}</span>
+                            </span>
+                        </li>
                         <li class="nav-item">
                             <form method="post" action="{% url 'logout' %}">
                                 {% csrf_token %}

@@ -1,6 +1,20 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.exceptions import ValidationError
 from django.db import models
+
+
+class UsuarioManager(UserManager):
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault(
+            "tipo_usuario",
+            Usuario.TipoUsuario.ADMINISTRADOR,
+        )
+        usuario = super().create_superuser(username, email, password, **extra_fields)
+        if usuario.tipo_usuario == Usuario.TipoUsuario.ADMINISTRADOR:
+            AdministradorSistema.objects.get_or_create(usuario=usuario)
+        return usuario
 
 
 class Usuario(AbstractUser):
@@ -20,6 +34,17 @@ class Usuario(AbstractUser):
         choices=TipoUsuario.choices,
         verbose_name="Tipo de usuário",
     )
+
+    objects = UsuarioManager()
+
+    REQUIRED_FIELDS = [
+        "email",
+        "cpf",
+        "nome",
+        "endereco",
+        "telefone",
+        "data_nascimento",
+    ]
 
     def clean(self):
         super().clean()
