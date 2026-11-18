@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Gestão da clínica{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+<div><h1 class="h2 mb-1">Gestão da clínica</h1><p class="text-body-secondary mb-0">Visão geral e cadastros do AgendaMedica.</p></div>
+<span class="badge text-bg-primary">Área administrativa</span>
+</div>
+<div class="row g-3 mb-4">
+{% for titulo,valor,icone in cards %}{% endfor %}
+<div class="col-sm-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="text-body-secondary small">Pacientes</div><div class="display-6 fw-semibold">{{ total_pacientes }}</div><a href="{% url 'gestao_pacientes' %}">Visualizar pacientes →</a></div></div></div>
+<div class="col-sm-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="text-body-secondary small">Médicos</div><div class="display-6 fw-semibold">{{ total_medicos }}</div><a href="{% url 'gestao_medicos' %}">Visualizar médicos →</a></div></div></div>
+<div class="col-sm-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="text-body-secondary small">Agendas</div><div class="display-6 fw-semibold">{{ total_agendas }}</div><a href="{% url 'gestao_agendas' %}">Visualizar agendas →</a></div></div></div>
+<div class="col-sm-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="text-body-secondary small">Consultas</div><div class="display-6 fw-semibold">{{ total_consultas }}</div><span class="text-body-secondary small">Total registrado</span></div></div></div>
+</div>
+<div class="row g-4">
+<div class="col-lg-7"><div class="card h-100"><div class="card-body"><h2 class="h5">Cadastros e gerenciamento</h2><div class="list-group list-group-flush">
+<a class="list-group-item list-group-item-action d-flex justify-content-between" href="{% url 'gestao_pacientes' %}">Pacientes <span>Consultar e gerenciar →</span></a>
+<a class="list-group-item list-group-item-action d-flex justify-content-between" href="{% url 'gestao_medicos' %}">Médicos <span>Consultar e gerenciar →</span></a>
+<a class="list-group-item list-group-item-action d-flex justify-content-between" href="{% url 'gestao_agendas' %}">Agendas e disponibilidades <span>Consultar e gerenciar →</span></a>
+<a class="list-group-item list-group-item-action d-flex justify-content-between" href="{% url 'admin:index' %}">Administração avançada <span>Abrir Jazzmin →</span></a>
+</div></div></div></div>
+<div class="col-lg-5"><div class="card h-100"><div class="card-body"><h2 class="h5">Consultas por situação</h2>{% for status,total in consultas_por_status.items %}<div class="d-flex justify-content-between py-2 border-bottom"><span>{{ status }}</span><strong>{{ total }}</strong></div>{% empty %}<p class="text-body-secondary">Nenhuma consulta cadastrada.</p>{% endfor %}</div></div></div>
+</div>
+{% endblock %}

@@ -43,6 +43,9 @@
                         {% elif user.tipo_usuario == 'ADMINISTRADOR' %}
                             <li class="nav-item"><a class="nav-link" href="{% url 'painel_administrador' %}">Administração</a></li>
                         {% endif %}
+                        {% if user.tipo_usuario == 'ADMINISTRADOR' or user.tipo_usuario == 'FUNCIONARIO' %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'gestao_inicio' %}">Gestão da clínica</a></li>
+                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'meu_perfil' %}">Meus Dados</a>
                         </li>

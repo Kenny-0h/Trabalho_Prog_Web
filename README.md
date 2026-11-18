@@ -54,3 +54,44 @@ Trabalho_Prog_Web/
 ├── manage.py
 └── requirements.txt
 
+
+## Ambiente administrativo e telas de gestão
+
+Os perfis **Administrador do sistema** e **Funcionário administrativo** possuem acesso à opção **Gestão da clínica** no menu. Nela estão disponíveis telas próprias (Bootstrap) para:
+
+- consultar, pesquisar, cadastrar, editar e excluir pacientes;
+- consultar, pesquisar e cadastrar/editar médicos (a exclusão de médicos é exclusiva do administrador do sistema);
+- consultar agendas e cadastrar, editar e excluir períodos de disponibilidade dos médicos;
+- visualizar indicadores gerais e a quantidade de consultas por status.
+
+Cada médico recebe automaticamente uma agenda ao ser cadastrado. A exclusão de pacientes ou médicos que já possuem consultas é bloqueada para preservar o histórico e os relacionamentos do banco.
+
+## Banco de dados de demonstração
+
+O repositório inclui o arquivo `banco_demo.sqlite3`, com registros inteiramente fictícios para apresentação. Para utilizá-lo:
+
+```bash
+cp banco_demo.sqlite3 db.sqlite3
+python manage.py runserver
+```
+
+Se preferir criar o banco do zero:
+
+```bash
+python manage.py migrate
+python manage.py popular_dados_demo
+python manage.py runserver
+```
+
+### Contas demonstrativas
+
+Todas as contas de demonstração utilizam a senha `Demo@12345`.
+
+| Perfil | Usuário | Senha |
+|---|---|---|
+| Administrador do sistema | `demo_admin` | `Demo@12345` |
+| Funcionário administrativo | `demo_funcionario` | `Demo@12345` |
+| Médico | `demo_medico_ana` | `Demo@12345` |
+| Paciente | `demo_paciente_01` | `Demo@12345` |
+
+**Importante:** os dados são exclusivamente fictícios e a senha é pública, destinada apenas à demonstração local. Não utilize essas contas em produção. O arquivo SQLite demonstrativo deve ser tratado como massa de teste, não como banco de produção.
