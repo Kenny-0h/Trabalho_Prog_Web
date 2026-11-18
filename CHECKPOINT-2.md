@@ -6,9 +6,9 @@
 
 ## 1. Autenticação
 
--   [ ] Implementar página de login.
--   [ ] Implementar logout.
--   [ ] Implementar cadastro público de pacientes.
+-   [X] Implementar página de login.
+-   [X] Implementar logout.
+-   [X] Implementar cadastro público de pacientes.
 -   [ ] Validar os dados dos formulários e apresentar mensagens claras
     de erro e sucesso.
 -   [ ] Proteger páginas que exigem autenticação.
