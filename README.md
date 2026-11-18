@@ -1,135 +1,56 @@
-# Sistema de Gerenciamento de Agendamento Médico
+# AgendaMedica — Sistema de Gerenciamento de Agendamento Médico
 
-Aplicação em desenvolvimento para apoiar o gerenciamento de uma clínica médica, como parte do Trabalho Prático da disciplina **GAC116 — Programação Web**. O projeto utiliza Python e Django e organiza os dados em três aplicativos: `usuarios`, `agenda` e `atendimento`.
+Aplicação web desenvolvida para apoiar o gerenciamento de uma clínica médica como parte do Trabalho Prático da disciplina **GAC116 — Programação Web** (UFLA). O projeto utiliza Python e Django (arquitetura MVT) e organiza o domínio em três aplicativos integrados: `usuarios`, `agenda` e `atendimento`.
 
-## Visão geral
+## Visão geral e perfis de usuário
 
-O domínio do sistema envolve quatro perfis de usuário:
+O sistema gerencia usuários, agendas médicas, disponibilidades, bloqueios, consultas e registros clínicos (prontuários, exames e receitas) contemplando quatro perfis com permissões e áreas distintas:
 
-- **Paciente:** pessoa atendida pela clínica.
-- **Médico:** profissional associado a uma especialidade e a uma agenda.
-- **Funcionário administrativo:** pessoa que apoia a operação da clínica.
-- **Administrador do sistema:** perfil administrativo com responsabilidade geral sobre o sistema.
-
-O objetivo do projeto é estruturar os dados e os processos relacionados a usuários, agendas médicas, consultas e registros de atendimento. A implementação atual está em uma etapa inicial: os modelos de domínio e suas configurações no Django Admin estão presentes, mas a interface própria para os usuários finais e os fluxos completos de negócio ainda não foram implementados.
+- **Paciente:** realiza autocadastro público, autentica-se no sistema, acessa seu painel exclusivo e mantém seus dados cadastrais e plano de saúde atualizados.
+- **Médico:** possui painel próprio e acesso restrito aos seus horários, suas consultas e prontuários/exames/receitas dos seus pacientes.
+- **Funcionário administrativo:** gerencia a operação recepcional da clínica (agendamentos, agendas, bloqueios e cadastro de pacientes), sem acesso a prontuários clínicos sigilosos nem permissão para criar médicos ou administradores.
+- **Administrador do sistema:** possui controle global sobre usuários, criação de médicos, funcionários administrativos, administradores e configurações gerais do sistema.
 
 ## Aplicativos Django
 
-| Aplicativo | Responsabilidade atual |
+| Aplicativo | Responsabilidade |
 |---|---|
-| [`usuarios`](docs/usuarios.md) | Usuário personalizado, dados pessoais e perfis de paciente, médico, funcionário e administrador. |
-| [`agenda`](docs/agenda.md) | Especialidades, agendas médicas, disponibilidades recorrentes e bloqueios de agenda. |
-| [`atendimento`](docs/atendimento.md) | Consultas, prontuários, exames e receitas. |
+| [`usuarios`](docs/usuarios.md) | Modelo `Usuario` personalizado (`AbstractUser`), autenticação (login/logout), cadastro público de pacientes, redirecionamento e controle de acesso por perfil. |
+| [`agenda`](docs/agenda.md) | Especialidades, agendas médicas, disponibilidades recorrentes por dia da semana e bloqueios de agenda com validação contra sobreposição. |
+| [`atendimento`](docs/atendimento.md) | Consultas médicas, prontuários clínicos, solicitações de exames e emissão de receitas. |
 
+## Tecnologias utilizadas
 
-## Tecnologias
-
-- Python
-- Django 5.2.17
-- Django Jazzmin 3.0.5, para personalização visual do Django Admin
-- SQLite, banco de dados configurado atualmente
-- HTML, CSS e JavaScript (estrutura de diretórios preparada; interface própria ainda não implementada)
-- Git e GitHub
-
-As dependências Python estão listadas em [`requirements.txt`](requirements.txt).
+- **Python 3.10+**
+- **Django 5.2.17**
+- **Django Jazzmin 3.0.5** (personalização visual do ambiente administrativo)
+- **Bootstrap 5.3.3** (interface responsiva, componentes padronizados e suporte nativo a `data-bs-theme`)
+- **HTML5, CSS3 (Variáveis CSS) e JavaScript ES6** (sistema extensível de temas Claro/Escuro persistido via `localStorage`)
+- **SQLite 3** (banco de dados relacional padrão para desenvolvimento e testes)
+- **Git e GitHub** (controle de versão com branches `main`, `develop` e `feature/*`)
 
 ## Estrutura do projeto
 
 ```text
 Trabalho_Prog_Web/
-├── config/                 # Configurações gerais do Django
-├── usuarios/               # Usuários e perfis
-├── agenda/                 # Especialidades e organização das agendas
-├── atendimento/            # Consultas e registros clínicos
-├── docs/                   # Documentação do projeto
+├── config/                     # Configurações globais (settings, urls, wsgi, asgi)
+├── usuarios/                   # Autenticação, perfis, formulários, services e permissões
+├── agenda/                     # Especialidades, agendas, disponibilidades e comando popular_dados_demo
+├── atendimento/                # Consultas, prontuários, exames e receitas
+├── docs/                       # DER e documentação detalhada por aplicativo
 ├── scripts/
-│   └── iniciar.sh          # Preparação do ambiente e inicialização local
-├── static/                 # Arquivos estáticos
-├── templates/              # Templates compartilhados
+│   └── iniciar.sh              # Script de preparação e inicialização automática (Linux/macOS/Git Bash)
+├── static/
+│   ├── css/
+│   │   ├── site.css            # Estilos gerais da aplicação
+│   │   └── themes/             # Arquitetura extensível de temas (light.css, dark.css, custom.css)
+│   └── js/
+│       └── theme.js            # Alternância e persistência de tema no localStorage
+├── templates/
+│   ├── base.html               # Layout base compartilhado com navbar adaptativa por perfil
+│   ├── 404.html                # Página de erro personalizada
+│   └── usuarios/               # Templates de início, login, cadastro, perfil e painéis por perfil
+├── CHECKPOINT-2.md             # Checklist de acompanhamento e decisões técnicas do Checkpoint 2
 ├── manage.py
 └── requirements.txt
-```
 
-## Como executar localmente
-
-### Pré-requisitos
-
-- Python 3.10 ou superior (recomendado para este projeto).
-- `venv` disponível na instalação do Python.
-- Acesso à internet na primeira instalação das dependências.
-
-### Inicialização rápida — Linux/macOS
-
-Na raiz do projeto, execute:
-
-```bash
-chmod +x scripts/iniciar.sh
-./scripts/iniciar.sh
-```
-
-O script cria o ambiente virtual `.venv` caso ainda não exista, instala as dependências, aplica as migrações, executa `manage.py check` e inicia o servidor em `http://127.0.0.1:8000/`.
-
-### Inicialização manual
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python manage.py migrate
-python manage.py check
-python manage.py runserver
-```
-
-Para acessar o ambiente administrativo, abra `http://127.0.0.1:8000/admin/`.
-
-Na primeira execução, crie um usuário administrador em outro terminal, com o ambiente virtual ativado:
-
-```bash
-python manage.py createsuperuser
-```
-
-O banco configurado atualmente é SQLite. O arquivo `db.sqlite3` é criado na raiz do projeto quando as migrações são aplicadas; não é necessário compartilhar um banco de dados preenchido para iniciar a aplicação.
-
-## Funcionalidades presentes no código
-
-- Modelo de usuário personalizado baseado em `AbstractUser`.
-- Tipos de usuário para paciente, médico, funcionário administrativo e administrador do sistema.
-- Perfis relacionados individualmente ao usuário.
-- Cadastro transacional de usuário com perfil por meio do serviço `criar_usuario_com_perfil`.
-- Cadastro de especialidades e associação de médicos a especialidades.
-- Uma agenda por médico e disponibilidades recorrentes por dia da semana.
-- Bloqueios de agenda com tipo e status.
-- Modelo de consulta com estados definidos e restrição para impedir dois registros do mesmo médico no mesmo horário.
-- Prontuário associado individualmente a uma consulta, com exames e receitas.
-- Configuração do Django Jazzmin e telas de administração dos modelos.
-- Testes automatizados nos três aplicativos.
-
-## O que ainda está em desenvolvimento
-
-Na versão analisada, as rotas do projeto apontam somente para o Django Admin. Os arquivos `views.py` dos aplicativos ainda contêm estruturas iniciais, e não há `urls.py` próprios para os aplicativos. Portanto, ainda não estão disponíveis uma interface de agendamento para pacientes, dashboards por perfil, nem fluxos completos de autenticação e autorização fora do Admin.
-
-Também não se deve interpretar a existência de um campo `tipo_usuario` como implementação completa de permissões por perfil. As regras de autorização e os fluxos de negócio precisam ser implementados e testados nas próximas etapas.
-
-Para executar os testes automatizados:
-
-```bash
-python manage.py test
-```
-
-## Integrantes
-
-| Integrante | GitHub |
-|---|---|
-| Luís Kennedy Gervásio Turola | @Kenny-0h |
-| Milena de Lourdes Barbosa| @MilenaBarbosa23 |
-
-## Disciplina
-
-**GAC116 — Programação Web**  
-Trabalho Prático: Projeto de Implementação com Django.
-
-## Documentação por aplicativo
-
-- [Aplicativo `usuarios`](docs/usuarios.md)
-- [Aplicativo `agenda`](docs/agenda.md)
-- [Aplicativo `atendimento`](docs/atendimento.md)
