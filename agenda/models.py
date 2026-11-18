@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.conf import settings
 
 
 class Especialidade(models.Model):
@@ -164,3 +165,62 @@ class BloqueioAgenda(models.Model):
             f"({self.data_hora_inicio:%d/%m/%Y %H:%M} "
             f"até {self.data_hora_fim:%d/%m/%Y %H:%M})"
         )
+
+
+class SolicitacaoDisponibilidade(models.Model):
+    """Pedido do médico para alterar uma disponibilidade existente."""
+
+    class Status(models.TextChoices):
+        PENDENTE = "PENDENTE", "Pendente"
+        APROVADA = "APROVADA", "Aprovada"
+        REJEITADA = "REJEITADA", "Rejeitada"
+
+    agenda = models.ForeignKey(
+        Agenda,
+        on_delete=models.CASCADE,
+        related_name="solicitacoes_disponibilidade",
+    )
+    disponibilidade = models.ForeignKey(
+        Disponibilidade,
+        on_delete=models.CASCADE,
+        related_name="solicitacoes",
+    )
+    dia_semana = models.IntegerField(choices=Disponibilidade.DiaSemana.choices)
+    horario_inicio = models.TimeField()
+    horario_fim = models.TimeField()
+    justificativa = models.TextField()
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDENTE,
+    )
+    analisado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="solicitacoes_disponibilidade_analisadas",
+        verbose_name="Analisado por",
+    )
+    analisado_em = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Analisado em",
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-criado_em"]
+
+    def clean(self):
+        super().clean()
+        if self.horario_inicio and self.horario_fim and self.horario_inicio >= self.horario_fim:
+            raise ValidationError({
+                "horario_fim": "O horário final deve ser posterior ao inicial."
+            })
+        if self.disponibilidade_id and self.agenda_id:
+            if self.disponibilidade.agenda_id != self.agenda_id:
+                raise ValidationError("A disponibilidade não pertence a esta agenda.")
+
+    def __str__(self):
+        return f"Solicitação de {self.agenda} ({self.get_status_display()})"

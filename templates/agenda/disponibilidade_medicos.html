@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Disponibilidade dos médicos{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <h1 class="h2 mb-1">Disponibilidade dos médicos</h1>
+    <p class="text-body-secondary mb-0">Consulte os horários livres nos próximos 30 dias. A duração de cada horário segue o tempo médio da especialidade.</p>
+</div>
+<form method="get" class="row g-2 align-items-end mb-4">
+    <div class="col-md-5">
+        <label class="form-label" for="especialidade">Especialidade</label>
+        <select class="form-select" id="especialidade" name="especialidade">
+            <option value="">Todas as especialidades</option>
+            {% for especialidade in especialidades %}
+                <option value="{{ especialidade.pk }}" {% if especialidade_selecionada == especialidade.pk|stringformat:"s" %}selected{% endif %}>{{ especialidade.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto"><button class="btn btn-primary">Filtrar</button></div>
+    <div class="col-auto"><a class="btn btn-outline-secondary" href="{% url 'disponibilidade_medicos' %}">Limpar</a></div>
+</form>
+<p class="small text-body-secondary">Período consultado: {{ data_inicio|date:"d/m/Y" }} a {{ data_fim|date:"d/m/Y" }}.</p>
+<div class="row g-3">
+{% for item in slots_por_medico %}
+    <div class="col-12">
+        <section class="card">
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+                    <div><h2 class="h5 mb-1">Dr(a). {{ item.medico.usuario.nome }}</h2><div class="text-body-secondary small">{{ item.medico.especialidade.nome }} · CRM {{ item.medico.crm }}</div></div>
+                    <span class="badge text-bg-primary align-self-start">{{ item.slots|length }} horário(s) livre(s)</span>
+                </div>
+                {% if item.slots %}
+                    <div class="table-responsive"><table class="table table-sm table-hover align-middle mb-0"><thead><tr><th>Data</th><th>Dia</th><th>Horário</th></tr></thead><tbody>
+                    {% for slot in item.slots %}<tr><td>{{ slot.data|date:"d/m/Y" }}</td><td>{{ slot.data|date:"l" }}</td><td>{{ slot.inicio|time:"H:i" }}–{{ slot.fim|time:"H:i" }}</td></tr>{% endfor %}
+                    </tbody></table></div>
+                {% else %}<p class="text-body-secondary mb-0">Nenhum horário livre encontrado no período.</p>{% endif %}
+            </div>
+        </section>
+    </div>
+{% empty %}
+    <div class="col-12"><div class="alert alert-info">Nenhum médico com agenda cadastrada foi encontrado.</div></div>
+{% endfor %}
+</div>
+{% endblock %}

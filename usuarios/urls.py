@@ -1,4 +1,5 @@
 from django.urls import path
+from . import funcionalidades_views as funcionalidades
 
 from . import views
 
@@ -12,4 +13,7 @@ urlpatterns = [
     path("painel/medico/", views.painel_medico, name="painel_medico"),
     path("painel/funcionario/", views.painel_funcionario, name="painel_funcionario"),
     path("painel/administrador/", views.painel_administrador, name="painel_administrador"),
+    path("paciente/disponibilidade-medicos/", funcionalidades.disponibilidade_medicos, name="disponibilidade_medicos"),
+    path("medico/agenda/", funcionalidades.agenda_do_medico, name="agenda_medico"),
+    path("medico/agenda/disponibilidade/nova/", funcionalidades.adicionar_disponibilidade_medico, name="medico_disponibilidade_nova"),
 ]

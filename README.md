@@ -95,3 +95,14 @@ Todas as contas de demonstração utilizam a senha `Demo@12345`.
 | Paciente | `demo_paciente_01` | `Demo@12345` |
 
 **Importante:** os dados são exclusivamente fictícios e a senha é pública, destinada apenas à demonstração local. Não utilize essas contas em produção. O arquivo SQLite demonstrativo deve ser tratado como massa de teste, não como banco de produção.
+
+
+## Organização por perfil e telas CRUD
+
+A área autenticada agora possui um painel inicial por perfil em `/portal/`, com dados básicos do usuário e links de acesso conforme sua função.
+
+- Paciente: consulta de horários e histórico de consultas; cada consulta abre detalhes com abas de prontuário, receitas e exames.
+- Médico: agenda própria, cadastro/edição de disponibilidades e solicitação de bloqueios para análise administrativa.
+- Administrador e funcionário: consultas, pacientes, médicos, especialidades, agendas e análise de solicitações; também há listas para prontuários, exames e receitas.
+
+As listas usam busca textual e um segundo filtro. As telas genéricas de registro permitem visualizar e, na área administrativa, editar/excluir dados.
