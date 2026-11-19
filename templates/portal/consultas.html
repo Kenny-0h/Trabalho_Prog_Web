@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="page-heading mb-4">
+    <div>
+        <a class="back-link" href="{% url 'portal_home' %}">← Área de trabalho</a>
+        <h1 class="h2 mt-2 mb-1">{{ titulo }}</h1>
+        <p class="text-body-secondary mb-0">Consulte seus agendamentos e os prontuários relacionados em uma única área.</p>
+    </div>
+    {% if create_url %}<a class="btn btn-success" href="{{ create_url }}">Adicionar consulta</a>{% endif %}
+</div>
+<section class="card consultation-workspace">
+    <ul class="nav nav-tabs px-3 pt-2" role="tablist" aria-label="Consultas e prontuários">
+        <li class="nav-item" role="presentation"><button class="nav-link active" id="consultas-tab" data-bs-toggle="tab" data-bs-target="#consultas-panel" type="button" role="tab" aria-controls="consultas-panel" aria-selected="true">Consultas</button></li>
+        {% if can_view_prontuarios %}<li class="nav-item" role="presentation"><button class="nav-link" id="prontuarios-tab" data-bs-toggle="tab" data-bs-target="#prontuarios-panel" type="button" role="tab" aria-controls="prontuarios-panel" aria-selected="false">Prontuários <span class="badge text-bg-success-subtle ms-1">{{ prontuarios|length }}</span></button></li>{% endif %}
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="consultas-panel" role="tabpanel" aria-labelledby="consultas-tab" tabindex="0">
+            <div class="card-body border-bottom">
+                <form method="get" class="row g-2 align-items-center">
+                    <div class="col-md"><label class="visually-hidden" for="search-query">Pesquisar consultas</label><div class="input-group"><span class="input-group-text bg-body" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg></span><input id="search-query" class="form-control" name="q" value="{{ q }}" placeholder="Pesquisar consultas"></div></div>
+                    {% if extra %}<input type="hidden" name="filtro" value="{{ extra }}">{% endif %}
+                    <div class="col-md-auto"><button class="btn btn-outline-success" type="submit">Pesquisar</button></div>
+                </form>
+                {% if q or extra %}<div class="active-filters mt-3"><span class="small text-body-secondary me-2">Filtros:</span>{% if q %}<a class="filter-chip" href="?{% if extra %}filtro={{ extra|urlencode }}{% endif %}">Busca: {{ q }} <span aria-hidden="true">×</span></a>{% endif %}{% if extra %}<a class="filter-chip" href="?{% if q %}q={{ q|urlencode }}{% endif %}">Filtro: {{ extra }} <span aria-hidden="true">×</span></a>{% endif %}<a class="small ms-2" href="?">Limpar filtros</a></div>{% endif %}
+            </div>
+            <div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr>{% for label in campos %}<th scope="col">{{ label }}</th>{% endfor %}<th scope="col" class="text-end">Ações</th></tr></thead><tbody>
+                {% for obj,cells in linhas %}<tr>{% for cell in cells %}<td>{{ cell }}</td>{% endfor %}<td class="text-end"><div class="row-actions">{% if can_view_prontuarios %}<a class="btn btn-sm btn-outline-success" href="{% url 'portal_consulta_detalhe' obj.pk %}">Prontuário</a>{% endif %}{% if can_manage_consultas %}<a class="btn btn-sm btn-outline-secondary" href="{% url 'portal_consulta_editar' obj.pk %}">Editar consulta</a>{% endif %}</div></td></tr>
+                {% empty %}<tr><td colspan="{{ campos|length|add:1 }}" class="empty-state"><span class="empty-state-icon" aria-hidden="true">⌕</span><strong>Nenhuma consulta encontrada</strong><span class="text-body-secondary">Tente ajustar a pesquisa ou limpar os filtros.</span></td></tr>{% endfor %}
+            </tbody></table></div>
+            {% if page_obj.paginator.num_pages > 1 %}<nav class="pagination-bar px-3" aria-label="Paginação"><span class="small text-body-secondary">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span><div class="d-flex gap-2">{% if page_obj.has_previous %}<a class="btn btn-sm btn-outline-secondary" href="?q={{ q|urlencode }}&filtro={{ extra|urlencode }}&page={{ page_obj.previous_page_number }}">Anterior</a>{% endif %}{% if page_obj.has_next %}<a class="btn btn-sm btn-outline-secondary" href="?q={{ q|urlencode }}&filtro={{ extra|urlencode }}&page={{ page_obj.next_page_number }}">Próxima</a>{% endif %}</div></nav>{% endif %}
+        </div>
+        {% if can_view_prontuarios %}<div class="tab-pane fade" id="prontuarios-panel" role="tabpanel" aria-labelledby="prontuarios-tab" tabindex="0">
+            <div class="card-body">
+                <div class="section-heading mb-3"><div><h2 class="h5 mb-1">Prontuários das consultas</h2><p class="small text-body-secondary mb-0">Cada prontuário reúne as receitas e os exames da consulta correspondente.</p></div>
+                    {% if can_manage_prontuarios %}<a class="btn btn-sm btn-outline-success" href="{% url 'portal_registros_lista' 'prontuario' %}">Gerenciar prontuários</a>{% endif %}
+                </div>{% endif %}
+                <div class="row g-3">
+                    {% for prontuario in prontuarios %}
+                        <div class="col-12 col-md-6 col-xxl-4">
+                            <article class="record-item record-overview h-100">
+                                <div class="d-flex justify-content-between align-items-start gap-2 mb-3"><div><span class="detail-label">Consulta #{{ prontuario.consulta_id }}</span><h3 class="h6 mb-0">{{ prontuario.consulta.data_hora|date:"d/m/Y · H:i" }}</h3></div><span class="badge text-bg-success-subtle">Prontuário</span></div>
+                                <dl class="record-mini-data mb-3">
+                                    {% if user.tipo_usuario != "PACIENTE" %}<div><dt>Paciente</dt><dd>{{ prontuario.consulta.paciente.usuario.nome }}</dd></div>{% endif %}
+                                    {% if user.tipo_usuario != "MEDICO" %}<div><dt>Médico</dt><dd>{{ prontuario.consulta.medico.usuario.nome }}</dd></div>{% endif %}
+                                    <div><dt>Diagnóstico</dt><dd>{{ prontuario.diagnostico|default:"Não registrado."|truncatechars:100 }}</dd></div>
+                                </dl>
+                                <div class="d-flex flex-wrap gap-2 mt-auto"><a class="btn btn-sm btn-success" href="{% url 'portal_consulta_detalhe' prontuario.consulta_id %}">Abrir prontuário</a>
+                                    {% if can_manage_prontuarios %}<a class="btn btn-sm btn-outline-secondary" href="{% url 'portal_registro_editar' 'prontuario' prontuario.pk %}">Editar</a><form method="post" action="{% url 'portal_registro_excluir' 'prontuario' prontuario.pk %}" onsubmit="return confirm('Excluir este prontuário e os registros associados? Esta ação não pode ser desfeita.')">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Excluir</button></form>{% endif %}
+                                </div>
+                            </article>
+                        </div>
+                    {% empty %}
+                        <div class="col-12"><p class="empty-record mb-0">Não há prontuários associados às consultas deste perfil.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

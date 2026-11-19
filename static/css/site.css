@@ -125,3 +125,60 @@ a:not([class]):hover { text-decoration: underline; }
 .auth-card .card-body { padding: clamp(1.5rem, 4vw, 2.5rem) !important; }
 .auth-card .form-control { min-height: 2.85rem; }
 .auth-card textarea.form-control { min-height: 6rem; }
+.app-container { width: min(100%, 2400px); max-width: none; padding-inline: clamp(1rem, 3vw, 3.5rem); }
+.navbar { min-height: 4.25rem; }
+.navbar .container-fluid { gap: 1rem; }
+.navbar .nav-link { padding-inline: .7rem; }
+main.app-container { padding-top: clamp(1.5rem, 3vw, 3rem) !important; padding-bottom: clamp(1.75rem, 3vw, 3.25rem) !important; }
+footer { padding-block: 1.15rem !important; }
+.card { border-radius: .95rem; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.card-header { border-radius: .95rem .95rem 0 0 !important; }
+.module-link { border-radius: .95rem; }
+.module-link:active, .record-item:active { transform: translateY(1px); }
+.form-card { width: 100%; max-width: 72rem; margin-inline: auto; }
+.auth-card-wide { max-width: 66rem; }
+.detail-label { display: block; margin-bottom: .35rem; color: var(--am-text-muted); font-size: .75rem; font-weight: 650; letter-spacing: .045em; text-transform: uppercase; }
+.record-summary .card-header, .record-section-card .card-header { background: var(--surface-soft); }
+.record-section-card .card-body { min-width: 0; }
+.record-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: .75rem; align-content: start; }
+.record-item { display: flex; flex-direction: column; min-width: 0; padding: 1rem; border: 1px solid var(--am-border-color); border-radius: .8rem; background: var(--am-bg-surface); transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.record-description { overflow-wrap: anywhere; white-space: pre-wrap; }
+.record-actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: .9rem; }
+.record-actions form { display: flex; }
+.empty-record, .soft-note { padding: .9rem 1rem; border: 1px solid var(--am-border-color); border-radius: .75rem; color: var(--am-text-muted); background: var(--surface-soft); }
+.record-mini-data { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: .75rem; }
+.record-mini-data > div { min-width: 0; }
+.record-mini-data dt { color: var(--am-text-muted); font-size: .76rem; font-weight: 600; }
+.record-mini-data dd { margin: .2rem 0 0; overflow-wrap: anywhere; }
+.record-overview .btn { align-self: flex-start; }
+.consultation-workspace { overflow: hidden; }
+.consultation-workspace > .nav-tabs { background: var(--am-bg-surface); }
+.consultation-workspace .nav-tabs .nav-link { padding: .8rem 1rem; }
+.consultation-workspace .tab-content { min-width: 0; }
+.consultation-workspace .table-responsive { min-height: 8rem; }
+.consultation-workspace .row-actions { min-width: 0; }
+.profile-summary { top: 6rem; }
+.workspace-intro { min-height: 7rem; }
+.hero-panel { background: var(--surface-soft); border: 1px solid var(--am-border-color); }
+@media (hover: hover) {
+  .card:hover { border-color: color-mix(in srgb, var(--am-brand-primary), var(--am-border-color) 68%); box-shadow: 0 .45rem 1.25rem rgba(27, 55, 37, .075); }
+  .module-link:hover, .record-item:hover { transform: translateY(-2px); }
+}
+@media (min-width: 1800px) {
+  .app-container { width: min(100%, 2560px); }
+  .record-list { grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr)); }
+}
+@media (max-width: 991.98px) {
+  .profile-summary { position: static; }
+  .navbar .navbar-nav { padding-block: .35rem; }
+}
+@media (max-width: 575.98px) {
+  .app-container { padding-inline: 1rem; }
+  .navbar .container-fluid { gap: .25rem; }
+  .record-list { grid-template-columns: 1fr; }
+  .consultation-workspace .nav-tabs { flex-wrap: nowrap; overflow-x: auto; }
+  .consultation-workspace .nav-tabs .nav-link { white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}

@@ -9,8 +9,7 @@ from usuarios.models import Paciente, Usuario
 class AutenticacaoViewsTest(TestCase):
     def test_inicio_fica_disponivel_sem_login(self):
         response = self.client.get(reverse("inicio"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "usuarios/inicio.html")
+        self.assertRedirects(response, reverse("login"))
 
     def test_login_exibe_formulario(self):
         response = self.client.get(reverse("login"))
@@ -57,5 +56,5 @@ class AutenticacaoViewsTest(TestCase):
         )
         self.client.force_login(usuario)
         response = self.client.post(reverse("logout"))
-        self.assertRedirects(response, reverse("inicio"))
+        self.assertRedirects(response, reverse("login"))
         self.assertNotIn("_auth_user_id", self.client.session)

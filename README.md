@@ -78,9 +78,9 @@ python manage.py runserver
 Se preferir criar o banco do zero:
 
 ```bash
-python manage.py migrate
-python manage.py popular_dados_demo
-python manage.py runserver
+python3 manage.py migrate
+python3 manage.py db.sqlite3
+python3 manage.py runserver
 ```
 
 ### Contas demonstrativas

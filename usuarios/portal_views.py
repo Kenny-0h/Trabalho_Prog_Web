@@ -30,19 +30,17 @@ def home(request):
     u=request.user
     links=[]
     if u.tipo_usuario == Usuario.TipoUsuario.PACIENTE:
-        links=[("Consultar horários disponíveis","/portal/disponibilidade/"),("Minhas consultas","/portal/minhas-consultas/")]
+        links=[("Consultar horários disponíveis","/portal/disponibilidade/"),("Consultas e prontuários","/portal/minhas-consultas/")]
         perfil=getattr(u,"perfil_paciente",None)
     elif u.tipo_usuario == Usuario.TipoUsuario.MEDICO:
-        links=[("Minha agenda","/portal/minha-agenda/"),("Cadastrar disponibilidade","/portal/minha-agenda/nova/"),("Solicitar bloqueio/alteração","/portal/minha-agenda/bloqueio/"),("Minhas consultas","/portal/minhas-consultas-medico/")]
+        links=[("Minha agenda","/portal/minha-agenda/"),("Cadastrar disponibilidade","/portal/minha-agenda/nova/"),("Solicitar bloqueio/alteração","/portal/minha-agenda/bloqueio/"),("Consultas e prontuários","/portal/minhas-consultas-medico/")]
         perfil=getattr(u,"perfil_medico",None)
     else:
-        links=[("Consultas","/portal/consultas/"),("Pacientes","/portal/pacientes/"),("Médicos","/portal/medicos/"),("Especialidades","/portal/especialidades/"),("Agendas e disponibilidades","/portal/agendas/"),("Solicitações de bloqueio","/portal/bloqueios/")]
-        if u.tipo_usuario == Usuario.TipoUsuario.ADMINISTRADOR:
-            links.extend([("Prontuários","/portal/registros/prontuario/"),("Exames","/portal/registros/exame/"),("Receitas","/portal/registros/receita/")])
+        links=[("Consultas e prontuários","/portal/consultas/"),("Pacientes","/portal/pacientes/"),("Médicos","/portal/medicos/"),("Especialidades","/portal/especialidades/"),("Agendas e disponibilidades","/portal/agendas/"),("Solicitações de bloqueio","/portal/bloqueios/")]
         perfil=getattr(u,"perfil_administrador",None) or getattr(u,"perfil_funcionario",None)
     return render(request,"portal/home.html",{"perfil":perfil,"links":links})
 
-def _list(request, title, qs, fields, create_url=None, filters=None, can_edit=True, can_delete=True):
+def _list(request, title, qs, fields, create_url=None, filters=None, can_edit=True, can_delete=True, include_prontuarios=False):
     q=request.GET.get("q","").strip()
     if q:
         search=Q()
@@ -68,7 +66,16 @@ def _list(request, title, qs, fields, create_url=None, filters=None, can_edit=Tr
             cells.append(str(valor if valor is not None else "—"))
         linhas.append((obj,cells))
     slug={"Pacientes":"paciente","Médicos":"medico","Especialidades":"especialidade","Agendas":"agenda","Consultas":"consulta","Minhas consultas":"consulta","Horários disponíveis":"disponibilidade","Minha agenda":"disponibilidade","Solicitações de bloqueio":"bloqueio","Prontuários":"prontuario","Exames":"exame","Receitas":"receita"}.get(title,"consulta")
-    return render(request,"portal/lista.html",{"titulo":title,"linhas":linhas,"campos":fields,"q":q,"extra":extra,"create_url":create_url,"can_edit":can_edit,"can_delete":can_delete,"slug":slug,"page_obj":page_obj})
+    context={"titulo":title,"linhas":linhas,"campos":fields,"q":q,"extra":extra,"create_url":create_url,"can_edit":can_edit,"can_delete":can_delete,"slug":slug,"page_obj":page_obj}
+    if include_prontuarios:
+        context["can_view_prontuarios"]=request.user.tipo_usuario!=Usuario.TipoUsuario.FUNCIONARIO
+        context["prontuarios"]=Prontuario.objects.filter(consulta__in=qs).select_related(
+            "consulta__paciente__usuario","consulta__medico__usuario","consulta__medico__especialidade"
+        ).order_by("-consulta__data_hora") if context["can_view_prontuarios"] else []
+        context["can_manage_prontuarios"]=request.user.tipo_usuario==Usuario.TipoUsuario.ADMINISTRADOR
+        context["can_manage_consultas"]=request.user.tipo_usuario in ADMIN
+        return render(request,"portal/consultas.html",context)
+    return render(request,"portal/lista.html",context)
 
 def _crud(model, title, fields, qs, search_fields, roles=ADMIN, create=True, edit=True, delete=True, detail=True):
     class F(forms.ModelForm):
@@ -109,7 +116,7 @@ def agendas(request):
 @allowed(*ADMIN)
 def consultas(request):
     qs=Consulta.objects.select_related("paciente__usuario","medico__usuario","medico__especialidade")
-    return _list(request,"Consultas",qs,{"Paciente":"paciente__usuario__nome","Médico":"medico__usuario__nome","Data":"data_hora","Status":"status"},create_url="/portal/consultas/nova/",filters=["paciente__usuario__nome","medico__usuario__nome","status"])
+    return _list(request,"Consultas",qs,{"Paciente":"paciente__usuario__nome","Médico":"medico__usuario__nome","Data":"data_hora","Status":"status"},create_url="/portal/consultas/nova/",filters=["paciente__usuario__nome","medico__usuario__nome","status"],include_prontuarios=True)
 @allowed(*ADMIN)
 def consulta_nova(request):
     return _form(request,Consulta,["paciente","medico","data_hora","status"],"Nova consulta","portal_consultas")
@@ -135,12 +142,12 @@ def consulta_detalhe(request,pk):
 @allowed(Usuario.TipoUsuario.PACIENTE)
 def minhas_consultas(request):
     qs=Consulta.objects.filter(paciente__usuario=request.user).select_related("medico__usuario","medico__especialidade")
-    return _list(request,"Minhas consultas",qs,{"Médico":"medico__usuario__nome","Data":"data_hora","Status":"status"},filters=["medico__usuario__nome","status"])
+    return _list(request,"Minhas consultas",qs,{"Médico":"medico__usuario__nome","Data":"data_hora","Status":"status"},filters=["medico__usuario__nome","status"],include_prontuarios=True)
 @login_required
 @allowed(Usuario.TipoUsuario.MEDICO)
 def consultas_medico(request):
     qs=Consulta.objects.filter(medico__usuario=request.user).select_related("paciente__usuario")
-    return _list(request,"Minhas consultas",qs,{"Paciente":"paciente__usuario__nome","Data":"data_hora","Status":"status"},filters=["paciente__usuario__nome","status"])
+    return _list(request,"Minhas consultas",qs,{"Paciente":"paciente__usuario__nome","Data":"data_hora","Status":"status"},filters=["paciente__usuario__nome","status"],include_prontuarios=True)
 @login_required
 @allowed(Usuario.TipoUsuario.PACIENTE)
 def disponibilidade(request):

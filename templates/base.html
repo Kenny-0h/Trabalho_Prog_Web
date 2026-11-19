@@ -21,8 +21,8 @@
 </head>
 <body class="d-flex flex-column min-vh-100">
     <nav class="navbar navbar-expand-lg border-bottom bg-body sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{% if user.is_authenticated %}{% url 'portal_home' %}{% else %}{% url 'inicio' %}{% endif %}"><span class="brand-mark me-2" aria-hidden="true">+</span>AgendaMedica</a>
+        <div class="container-fluid app-container">
+            <a class="navbar-brand fw-bold" href="{% if user.is_authenticated %}{% url 'portal_home' %}{% else %}{% url 'login' %}{% endif %}"><span class="brand-mark me-2" aria-hidden="true">+</span>AgendaMedica</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPrincipal" aria-controls="navbarPrincipal" aria-expanded="false" aria-label="Abrir navegação"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarPrincipal">
                 {% if user.is_authenticated %}<ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="{% url 'portal_home' %}">Área de trabalho</a></li>{% if user.tipo_usuario == 'ADMINISTRADOR' or user.tipo_usuario == 'FUNCIONARIO' %}<li class="nav-item"><a class="nav-link" href="{% url 'gestao_inicio' %}">Gestão da clínica</a></li>{% endif %}</ul>{% endif %}
@@ -34,7 +34,7 @@
         </div>
     </nav>
 
-    <main class="container flex-grow-1 py-4 py-lg-5">
+    <main class="container-fluid app-container flex-grow-1 py-4 py-lg-5">
         {% if messages %}
             <div class="messages mb-4" aria-live="polite">
                 {% for message in messages %}
@@ -49,7 +49,7 @@
     </main>
 
     <footer class="border-top py-4 mt-auto">
-        <div class="container text-center text-body-secondary small">
+        <div class="container-fluid app-container text-center text-body-secondary small">
             &copy; 2026 AgendaMedica · Sistema de gerenciamento de agendamentos médicos
         </div>
     </footer>

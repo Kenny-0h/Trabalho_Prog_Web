@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from agenda.models import Agenda, BloqueioAgenda, Disponibilidade, Especialidade, SolicitacaoDisponibilidade
-from atendimento.models import Consulta
+from atendimento.models import Consulta, Exame, Prontuario, Receita
 from usuarios.models import FuncionarioAdministrativo, Medico, Paciente, Usuario
 
 
@@ -149,3 +149,36 @@ class TelasPorPerfilTest(TestCase):
         response = self.client.post(reverse("gestao_consulta_excluir", args=[consulta.pk]))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Consulta.objects.filter(pk=consulta.pk).exists())
+
+    def test_consultas_integram_prontuarios_e_mantem_permissoes(self):
+        consulta = Consulta.objects.create(
+            paciente=self.paciente,
+            medico=self.medico,
+            data_hora=timezone.now(),
+        )
+        prontuario = Prontuario.objects.create(
+            consulta=consulta,
+            diagnostico="Diagnóstico de teste",
+        )
+        Receita.objects.create(prontuario=prontuario, descricao="Orientação de teste")
+        Exame.objects.create(prontuario=prontuario, nome="Exame de teste")
+
+        self.client.force_login(self.usuario_paciente)
+        response = self.client.get(reverse("portal_minhas_consultas"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "portal/consultas.html")
+        self.assertContains(response, 'id="prontuarios-tab"')
+        self.assertContains(response, "Diagnóstico de teste")
+
+        response = self.client.get(reverse("portal_consulta_detalhe", args=[consulta.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Receitas")
+        self.assertContains(response, "Exames")
+        self.assertContains(response, "Orientação de teste")
+        self.assertContains(response, "Exame de teste")
+
+        self.client.force_login(self.usuario_funcionario)
+        response = self.client.get(reverse("portal_consultas"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'id="prontuarios-tab"')
+        self.assertNotContains(response, "Diagnóstico de teste")

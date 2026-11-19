@@ -109,7 +109,7 @@ class AutenticacaoEPermissoesViewsTest(TestCase):
     def test_logout_encerra_sessao_via_post(self):
         self.client.login(username="paciente_teste", password=self.senha)
         resposta = self.client.post(reverse("logout"), follow=True)
-        self.assertRedirects(resposta, reverse("inicio"))
+        self.assertRedirects(resposta, reverse("login"))
         self.assertFalse(resposta.context["user"].is_authenticated)
 
     def test_cadastro_publico_cria_apenas_paciente(self):

@@ -30,7 +30,7 @@ class EntrarView(LoginView):
 
 
 def inicio(request):
-    return render(request, "usuarios/inicio.html")
+    return redirect("login")
 
 
 def cadastro_paciente(request):
@@ -95,4 +95,4 @@ def painel_administrador(request):
 def sair(request):
     auth_logout(request)
     messages.success(request, "Você saiu do sistema.")
-    return redirect("inicio")
+    return redirect("login")
