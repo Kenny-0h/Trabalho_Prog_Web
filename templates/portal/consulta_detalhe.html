@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Consulta #{{ consulta.pk }}{% endblock %}
+{% block content %}
+<div class="page-heading mb-4">
+    <div>
+        {% if user.tipo_usuario == "PACIENTE" %}<a class="back-link" href="{% url 'portal_minhas_consultas' %}">← Consultas</a>
+        {% elif user.tipo_usuario == "MEDICO" %}<a class="back-link" href="{% url 'portal_consultas_medico' %}">← Consultas</a>
+        {% else %}<a class="back-link" href="{% url 'portal_consultas' %}">← Consultas</a>{% endif %}
+        <h1 class="h2 mt-2 mb-0">Consulta #{{ consulta.pk }}</h1>
+    </div>
+</div>
+<section class="card mb-4">
+    <div class="card-body p-4">
+        <div class="row g-3">
+            <div class="col-sm-6 col-xl-3"><span class="detail-label">Paciente</span><div class="fw-semibold">{{ consulta.paciente.usuario.nome }}</div></div>
+            <div class="col-sm-6 col-xl-3"><span class="detail-label">Médico</span><div class="fw-semibold">{{ consulta.medico.usuario.nome }}</div><span class="small text-body-secondary">{{ consulta.medico.especialidade }}</span></div>
+            <div class="col-sm-6 col-xl-3"><span class="detail-label">Data e horário</span><div class="fw-semibold">{{ consulta.data_hora|date:"d/m/Y H:i" }}</div></div>
+            <div class="col-sm-6 col-xl-3"><span class="detail-label">Status</span><div><span class="badge text-bg-success-subtle">{{ consulta.get_status_display }}</span></div></div>
+        </div>
+    </div>
+</section>
+
+{% if prontuario %}
+    <section class="card record-summary mb-4">
+        <div class="card-header d-flex align-items-center gap-2 py-3"><span class="module-icon mb-0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7"/></svg></span><h2 class="h5 mb-0">Prontuário</h2>{% if user.tipo_usuario == "ADMINISTRADOR" %}<a class="btn btn-sm btn-outline-success ms-auto" href="{% url 'portal_registro_editar' 'prontuario' prontuario.pk %}">Editar</a>{% endif %}</div>
+        <div class="card-body p-4">
+            <dl class="record-fields row mb-0">
+                <dt class="col-md-3">Anamnese</dt><dd class="col-md-9">{{ prontuario.anamnese|default:"Não registrada." }}</dd>
+                <dt class="col-md-3">Diagnóstico</dt><dd class="col-md-9">{{ prontuario.diagnostico|default:"Não registrado." }}</dd>
+                <dt class="col-md-3">Observações</dt><dd class="col-md-9">{{ prontuario.observacoes|default:"Nenhuma observação." }}</dd>
+            </dl>
+        </div>
+    </section>
+{% else %}
+    <div class="soft-note mb-4" role="status">Ainda não há prontuário registrado para esta consulta.</div>
+{% endif %}
+
+<div class="row g-4">
+    <div class="col-12 col-xl-6">
+        <section class="card record-section-card h-100">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 p-3">
+                <div class="d-flex align-items-center gap-2"><span class="module-icon mb-0" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M8 3h8v4H8zM6 5H4v16h16V5h-2M8 12h8M8 16h8"/></svg></span><div><h2 class="h5 mb-0">Receitas</h2><span class="small text-body-secondary">Prescrições desta consulta</span></div></div>
+                <span class="badge text-bg-success-subtle">{{ receitas|length }}</span>
+            </div>
+            <div class="card-body p-3">
+                <div class="record-list">
+                    {% for receita in receitas %}
+                        <article class="record-item">
+                            <div class="d-flex flex-wrap justify-content-between gap-2 mb-2"><strong>Receita</strong><time class="small text-body-secondary" datetime="{{ receita.data_emissao|date:'Y-m-d' }}">{{ receita.data_emissao|date:"d/m/Y" }}</time></div>
+                            <p class="mb-0 record-description">{{ receita.descricao }}</p>
+                            {% if user.tipo_usuario == "ADMINISTRADOR" %}<div class="record-actions"><a class="btn btn-sm btn-outline-success" href="{% url 'portal_registro_editar' 'receita' receita.pk %}">Editar</a><form method="post" action="{% url 'portal_registro_excluir' 'receita' receita.pk %}" onsubmit="return confirm('Excluir esta receita? Esta ação não pode ser desfeita.')">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Excluir</button></form></div>{% endif %}
+                        </article>
+                    {% empty %}<p class="empty-record mb-0">Nenhuma receita registrada para esta consulta.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </div>
+    <div class="col-12 col-xl-6">
+        <section class="card record-section-card h-100">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 p-3">
+                <div class="d-flex align-items-center gap-2"><span class="module-icon mb-0" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h4"/></svg></span><div><h2 class="h5 mb-0">Exames</h2><span class="small text-body-secondary">Solicitações desta consulta</span></div></div>
+                <span class="badge text-bg-success-subtle">{{ exames|length }}</span>
+            </div>
+            <div class="card-body p-3">
+                <div class="record-list">
+                    {% for exame in exames %}
+                        <article class="record-item">
+                            <div class="d-flex flex-wrap justify-content-between gap-2 mb-2"><strong>{{ exame.nome }}</strong><time class="small text-body-secondary" {% if exame.data_solicitacao %}datetime="{{ exame.data_solicitacao|date:'Y-m-d' }}"{% endif %}>{{ exame.data_solicitacao|date:"d/m/Y"|default:"Data não informada" }}</time></div>
+                            <p class="mb-0 record-description">{{ exame.descricao|default:"Sem descrição adicional." }}</p>
+                            {% if user.tipo_usuario == "ADMINISTRADOR" %}<div class="record-actions"><a class="btn btn-sm btn-outline-success" href="{% url 'portal_registro_editar' 'exame' exame.pk %}">Editar</a><form method="post" action="{% url 'portal_registro_excluir' 'exame' exame.pk %}" onsubmit="return confirm('Excluir este exame? Esta ação não pode ser desfeita.')">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Excluir</button></form></div>{% endif %}
+                        </article>
+                    {% empty %}<p class="empty-record mb-0">Nenhum exame solicitado para esta consulta.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

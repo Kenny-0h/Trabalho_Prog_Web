@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Área de trabalho{% endblock %}
+{% block content %}
+<section class="workspace-intro mb-4">
+    <div>
+        <p class="eyebrow mb-2">AGENDA MÉDICA <span class="intro-divider">/</span> ÁREA DE TRABALHO</p>
+        <h1 class="h2 mb-2">Olá, {{ request.user.nome|default:request.user.username }}</h1>
+        <p class="text-body-secondary mb-0">Acesse rapidamente as funcionalidades disponíveis para você.</p>
+    </div>
+    <a class="btn btn-outline-success" href="{% url 'meu_perfil' %}">Meu perfil <svg class="icon ms-1" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+</section>
+<div class="row g-4 align-items-start">
+    <aside class="col-lg-4 col-xl-3">
+        <section class="card profile-summary">
+            <div class="card-body p-4">
+                <div class="profile-topline"><div class="profile-avatar" aria-hidden="true">{{ request.user.nome|default:request.user.username|first|upper }}</div><span class="profile-label">PERFIL ATIVO</span></div>
+                <h2 class="h5 mt-3 mb-1">{{ request.user.nome|default:request.user.username }}</h2>
+                <span class="badge rounded-pill text-bg-success-subtle">{{ request.user.get_tipo_usuario_display }}</span>
+                <div class="profile-divider"></div>
+                <dl class="profile-data mb-0">
+                    <div><dt><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>E-mail</dt><dd>{{ request.user.email|default:"Não informado" }}</dd></div>
+                    <div><dt><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg>Usuário</dt><dd>{{ request.user.username }}</dd></div>
+                </dl>
+                <a class="profile-edit-link" href="{% url 'meu_perfil' %}">Ver e editar dados <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </div>
+        </section>
+    </aside>
+    <section class="col-lg-8 col-xl-9" aria-labelledby="featuresTitle">
+        <div class="section-heading mb-3"><div><p class="eyebrow mb-1">NAVEGAÇÃO</p><h2 id="featuresTitle" class="h4 mb-0">Funcionalidades</h2></div><span class="feature-count">{{ links|length }} disponíveis</span></div>
+        <div class="row g-3">
+            {% for label,url in links %}
+            <div class="col-sm-6 col-xl-4 col-xxl-3"><a class="module-link card h-100" href="{{ url }}">
+                <span class="module-icon" aria-hidden="true">
+                    {% if 'consulta' in label|lower %}<svg class="icon icon-lg" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M12 14v5M9.5 16.5h5"/></svg>
+                    {% elif 'agenda' in label|lower or 'horário' in label|lower or 'disponibilidade' in label|lower %}<svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+                    {% elif 'paciente' in label|lower %}<svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2.5 21a6.5 6.5 0 0 1 13 0M17 8h5M19.5 5.5v5"/></svg>
+                    {% elif 'médico' in label|lower %}<svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M8 3v5a4 4 0 0 0 8 0V3M6 3h4M14 3h4M12 12v3a5 5 0 0 0 10 0v-1"/><circle cx="22" cy="12" r="1"/></svg>
+                    {% elif 'prontuário' in label|lower or 'exame' in label|lower or 'receita' in label|lower %}<svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7"/></svg>
+                    {% elif 'bloqueio' in label|lower or 'solicitação' in label|lower %}<svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="M9 12h6"/></svg>
+                    {% else %}<svg class="icon icon-lg" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>{% endif %}
+                </span>
+                <span class="module-title">{{ label }}</span><span class="module-arrow" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a></div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

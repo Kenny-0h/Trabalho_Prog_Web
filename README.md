@@ -1,553 +1,108 @@
-# 🏥 Sistema de Gerenciamento de Agendamento Médico
+# AgendaMedica — Sistema de Gerenciamento de Agendamento Médico
 
-Sistema web para gerenciamento de consultas médicas, desenvolvido como Trabalho Prático da disciplina **GAC116 — Programação Web**, utilizando o framework Django.
+Aplicação web desenvolvida para apoiar o gerenciamento de uma clínica médica como parte do Trabalho Prático da disciplina **GAC116 — Programação Web** (UFLA). O projeto utiliza Python e Django (arquitetura MVT) e organiza o domínio em três aplicativos integrados: `usuarios`, `agenda` e `atendimento`.
 
-> **Status:** 🚧 Em desenvolvimento
+## Visão geral e perfis de usuário
 
----
+O sistema gerencia usuários, agendas médicas, disponibilidades, bloqueios, consultas e registros clínicos (prontuários, exames e receitas) contemplando quatro perfis com permissões e áreas distintas:
 
-## 📋 Sobre o projeto
+- **Paciente:** realiza autocadastro público, autentica-se no sistema, acessa seu painel exclusivo e mantém seus dados cadastrais e plano de saúde atualizados.
+- **Médico:** possui painel próprio e acesso restrito aos seus horários, suas consultas e prontuários/exames/receitas dos seus pacientes.
+- **Funcionário administrativo:** gerencia a operação recepcional da clínica (agendamentos, agendas, bloqueios e cadastro de pacientes), sem acesso a prontuários clínicos sigilosos nem permissão para criar médicos ou administradores.
+- **Administrador do sistema:** possui controle global sobre usuários, criação de médicos, funcionários administrativos, administradores e configurações gerais do sistema.
 
-O projeto consiste no desenvolvimento de uma aplicação web para gerenciamento de uma clínica médica, contemplando o cadastro e gerenciamento de pacientes, médicos, funcionários administrativos, especialidades, agendas, consultas e informações relacionadas aos atendimentos.
+## Aplicativos Django
 
-A aplicação foi projetada para possuir diferentes níveis de acesso de acordo com o perfil do usuário, permitindo que cada papel tenha acesso somente às funcionalidades correspondentes às suas responsabilidades.
+| Aplicativo | Responsabilidade |
+|---|---|
+| [`usuarios`](docs/usuarios.md) | Modelo `Usuario` personalizado (`AbstractUser`), autenticação (login/logout), cadastro público de pacientes, redirecionamento e controle de acesso por perfil. |
+| [`agenda`](docs/agenda.md) | Especialidades, agendas médicas, disponibilidades recorrentes por dia da semana e bloqueios de agenda com validação contra sobreposição. |
+| [`atendimento`](docs/atendimento.md) | Consultas médicas, prontuários clínicos, solicitações de exames e emissão de receitas. |
 
-O sistema será desenvolvido utilizando a arquitetura **MVT (Model-View-Template)** do Django e um banco de dados relacional.
+## Tecnologias utilizadas
 
-O projeto também busca aplicar os principais conceitos abordados na disciplina, incluindo:
+- **Python 3.10+**
+- **Django 5.2.17**
+- **Django Jazzmin 3.0.5** (personalização visual do ambiente administrativo)
+- **Bootstrap 5.3.3** (interface responsiva, componentes padronizados e suporte nativo a `data-bs-theme`)
+- **HTML5, CSS3 (Variáveis CSS) e JavaScript ES6** (sistema extensível de temas Claro/Escuro persistido via `localStorage`)
+- **SQLite 3** (banco de dados relacional padrão para desenvolvimento e testes)
+- **Git e GitHub** (controle de versão com branches `main`, `develop` e `feature/*`)
 
-* desenvolvimento web com Django;
-* autenticação de usuários;
-* controle de acesso e permissões;
-* persistência de dados;
-* modelagem de banco de dados;
-* desenvolvimento de interfaces web;
-* utilização de Git e GitHub;
-* organização e desenvolvimento colaborativo.
-
-O trabalho exige, entre outros requisitos, autenticação, operações CRUD, diferentes perfis de usuários, área administrativa protegida, área destinada aos usuários finais e uma interface responsiva com tema claro e escuro.
-
----
-
-## 🎯 Objetivos
-
-### Objetivo acadêmico
-
-Aplicar os conhecimentos adquiridos na disciplina de Programação Web no desenvolvimento de uma aplicação Django completa, organizada e funcional.
-
-### Objetivo do sistema
-
-Disponibilizar uma plataforma para gerenciamento dos processos básicos de uma clínica médica, permitindo:
-
-* gerenciamento de usuários;
-* gerenciamento de médicos;
-* gerenciamento de pacientes;
-* gerenciamento de especialidades;
-* gerenciamento das agendas médicas;
-* gerenciamento de disponibilidades;
-* agendamento de consultas;
-* cancelamento de consultas;
-* confirmação e acompanhamento de consultas;
-* registro de prontuários;
-* registro de exames;
-* registro de receitas;
-* gerenciamento de bloqueios de horários;
-* visualização de informações através de dashboards.
-
----
-
-## 👥 Perfis de usuário
-
-O sistema possui quatro perfis principais:
-
-| Perfil                         | Descrição                                                                                                        |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| **Paciente**                   | Usuário que realiza e acompanha seus próprios agendamentos e acessa informações permitidas de seus atendimentos. |
-| **Médico**                     | Profissional responsável pelos atendimentos e pelos registros relacionados às consultas que realiza.             |
-| **Funcionário Administrativo** | Responsável pela administração operacional da clínica.                                                           |
-| **Administrador do Sistema**   | Usuário com nível administrativo superior e acesso geral ao sistema.                                             |
-
-Cada usuário possui **um único perfil** dentro do sistema.
-
-A estrutura de usuários segue o conceito de uma entidade base `Usuário`, especializada de acordo com o papel desempenhado no sistema.
-
----
-
-## 🩺 Principais funcionalidades
-
-### Autenticação
-
-* Cadastro de pacientes;
-* Login;
-* Logout;
-* Autenticação por usuário e senha;
-* Controle de acesso por perfil;
-* Proteção das áreas autenticadas.
-
-### Usuários
-
-* Cadastro de pacientes;
-* Cadastro de médicos;
-* Gerenciamento de funcionários administrativos;
-* Gerenciamento de administradores do sistema;
-* Controle de permissões.
-
-### Médicos
-
-* Cadastro de informações profissionais;
-* Associação com uma especialidade;
-* Agenda própria;
-* Definição de disponibilidade;
-* Visualização de consultas;
-* Confirmação de consultas;
-* Registro de prontuários.
-
-### Agendamento
-
-O fluxo principal de agendamento será:
+## Estrutura do projeto
 
 ```text
-Paciente
-   ↓
-Escolhe especialidade
-   ↓
-Escolhe médico
-   ↓
-Escolhe data/horário disponível
-   ↓
-Confirma agendamento
-   ↓
-Consulta registrada
-```
-
-O sistema deverá impedir que dois pacientes ocupem o mesmo horário de um mesmo médico.
-
-Não haverá operação de remarcação. Para alterar um agendamento, a consulta existente deverá ser cancelada e uma nova consulta deverá ser criada.
-
-### Consultas
-
-As consultas possuirão os seguintes estados:
-
-```text
-AGENDADA
-CONFIRMADA
-COMPLETA
-CANCELADA
-NAO_COMPARECEU
-```
-
-O ciclo de vida principal será:
-
-```text
-AGENDADA
-   ├──→ CONFIRMADA ───→ COMPLETA
-   │          ├───────→ CANCELADA
-   │          └───────→ NAO_COMPARECEU
-   │
-   └──→ CANCELADA
-```
-
-### Prontuários
-
-Cada consulta poderá possuir um prontuário associado.
-
-O prontuário poderá conter:
-
-* diagnóstico;
-* observações;
-* exames;
-* receitas.
-
-O acesso às informações será controlado de acordo com o perfil do usuário.
-
-### Dashboards
-
-Serão disponibilizados dashboards específicos para os diferentes perfis, apresentando informações relevantes de acordo com suas responsabilidades no sistema.
-
----
-
-## 🏗️ Arquitetura
-
-O projeto será organizado em aplicativos Django separados por **responsabilidade de domínio**, e não por perfil de usuário.
-
-```text
-projeto/
-│
-├── config/
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-│
-├── usuarios/
-│
-├── agenda/
-│
-├── atendimento/
-│
-├── templates/
-│
+Trabalho_Prog_Web/
+├── config/                     # Configurações globais (settings, urls, wsgi, asgi)
+├── usuarios/                   # Autenticação, perfis, formulários, services e permissões
+├── agenda/                     # Especialidades, agendas, disponibilidades e comando popular_dados_demo
+├── atendimento/                # Consultas, prontuários, exames e receitas
+├── docs/                       # DER e documentação detalhada por aplicativo
+├── scripts/
+│   └── iniciar.sh              # Script de preparação e inicialização automática (Linux/macOS/Git Bash)
 ├── static/
-│
-└── manage.py
-```
-
-### `usuarios`
-
-Responsável por:
-
-* usuário base;
-* autenticação;
-* perfis;
-* dados pessoais;
-* controle relacionado à identidade dos usuários.
-
-### `agenda`
-
-Responsável por:
-
-* especialidades;
-* agendas;
-* disponibilidades;
-* bloqueios;
-* consultas;
-* geração de horários;
-* regras de agendamento;
-* cancelamentos;
-* confirmações.
-
-### `atendimento`
-
-Responsável por:
-
-* prontuários;
-* exames;
-* receitas.
-
-A divisão em três aplicativos mantém as responsabilidades separadas sem criar um aplicativo independente para cada perfil de usuário.
-
----
-
-## 🗄️ Modelo conceitual
-
-A estrutura principal do sistema pode ser representada da seguinte maneira:
-
-```text
-                         ┌──────────────┐
-                         │    Usuário   │
-                         └──────┬───────┘
-                                │
-             ┌──────────────────┼──────────────────┐
-             │                  │                  │
-             ▼                  ▼                  ▼
-         Paciente            Médico        Funcionário /
-                                             Administrador
-                                │
-                                ▼
-                         Especialidade
-                                │
-                                ▼
-                             Agenda
-                                │
-                                ▼
-                        Disponibilidade
+│   ├── css/
+│   │   ├── site.css            # Estilos gerais da aplicação
+│   │   └── themes/             # Arquitetura extensível de temas (light.css, dark.css, custom.css)
+│   └── js/
+│       └── theme.js            # Alternância e persistência de tema no localStorage
+├── templates/
+│   ├── base.html               # Layout base compartilhado com navbar adaptativa por perfil
+│   ├── 404.html                # Página de erro personalizada
+│   └── usuarios/               # Templates de início, login, cadastro, perfil e painéis por perfil
+├── CHECKPOINT-2.md             # Checklist de acompanhamento e decisões técnicas do Checkpoint 2
+├── manage.py
+└── requirements.txt
 
 
-Paciente ───────────────┐
-                        │
-                        ▼
-                     Consulta ◄──────── Médico
-                        │
-                        ▼
-                    Prontuário
-                     /       \
-                    ▼         ▼
-                 Exame      Receita
-```
+## Ambiente administrativo e telas de gestão
 
-Algumas decisões importantes de modelagem:
+Os perfis **Administrador do sistema** e **Funcionário administrativo** possuem acesso à opção **Gestão da clínica** no menu. Nela estão disponíveis telas próprias (Bootstrap) para:
 
-* CPF é único, mas não é a chave primária;
-* `Usuário` é a entidade base;
-* cada usuário possui apenas um perfil;
-* cada médico possui uma especialidade;
-* uma consulta não armazena diretamente sua especialidade;
-* a especialidade é obtida através do médico;
-* o prontuário pertence a uma consulta;
-* o prontuário não duplica os relacionamentos com paciente e médico;
-* as disponibilidades são recorrentes;
-* a duração dos horários é determinada pela especialidade.
+- consultar, pesquisar, cadastrar, editar e excluir pacientes;
+- consultar, pesquisar e cadastrar/editar médicos (a exclusão de médicos é exclusiva do administrador do sistema);
+- consultar agendas e cadastrar, editar e excluir períodos de disponibilidade dos médicos;
+- visualizar indicadores gerais e a quantidade de consultas por status.
 
----
+Cada médico recebe automaticamente uma agenda ao ser cadastrado. A exclusão de pacientes ou médicos que já possuem consultas é bloqueada para preservar o histórico e os relacionamentos do banco.
 
-## 🛠️ Tecnologias
+## Banco de dados de demonstração
 
-As tecnologias previstas para o projeto são:
-
-* **Python**
-* **Django**
-* **PostgreSQL**
-* **HTML5**
-* **CSS3**
-* **JavaScript**
-* **Framework CSS** — a definir
-* **Django Admin**
-* **Git**
-* **GitHub**
-
-O trabalho exige a utilização do Django e de um banco de dados relacional, além de pelo menos dois aplicativos Django no projeto.
-
-A interface deverá utilizar um framework CSS, ser responsiva e possuir tema claro e escuro.
-
----
-
-## ⚙️ Instalação
-
-### 1. Clonar o repositório
+O repositório inclui o arquivo `banco_demo.sqlite3`, com registros inteiramente fictícios para apresentação. Para utilizá-lo:
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
-cd <NOME_DO_REPOSITORIO>
-```
-
-### 2. Criar um ambiente virtual
-
-Linux/macOS:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
-
-Windows:
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-### 3. Instalar as dependências
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configurar as variáveis de ambiente
-
-Criar o arquivo `.env` conforme o modelo disponibilizado no projeto.
-
-> A estrutura definitiva das variáveis de ambiente será definida durante a configuração do projeto.
-
-### 5. Executar as migrações
-
-```bash
-python manage.py migrate
-```
-
-### 6. Criar um superusuário
-
-```bash
-python manage.py createsuperuser
-```
-
-### 7. Executar o servidor
-
-```bash
+cp banco_demo.sqlite3 db.sqlite3
 python manage.py runserver
 ```
 
-A aplicação poderá então ser acessada localmente através do endereço informado pelo Django no terminal.
-
----
-
-## 🧪 Testes
-
-Os testes automatizados serão adicionados progressivamente durante o desenvolvimento.
-
-A intenção é testar principalmente:
-
-* regras de agendamento;
-* disponibilidade de horários;
-* bloqueios;
-* cancelamentos;
-* permissões;
-* transições de estado das consultas;
-* acesso aos prontuários;
-* regras específicas de cada perfil.
-
----
-
-## 🌿 Estratégia de desenvolvimento com Git
-
-O desenvolvimento será realizado de forma colaborativa utilizando Git e GitHub.
-
-O repositório deverá possuir, no mínimo, as branches exigidas pelo trabalho:
-
-```text
-main
-develop
-feature/*
-```
-
-O fluxo adotado pelo projeto será:
-
-```text
-main
-  ↑
-develop
-  ↑
-feature/*
-```
-
-Novas funcionalidades serão desenvolvidas em branches derivadas de `develop`.
-
-Exemplo:
-
-```text
-feature/autenticacao
-feature/modelagem-usuarios
-feature/agendamento-consultas
-feature/prontuario
-```
-
-Também poderão ser utilizadas outras categorias quando necessário:
-
-```text
-bugfix/*
-hotfix/*
-refactor/*
-```
-
-As tarefas serão organizadas através de **Issues do GitHub**. Cada integrante deverá assumir as tarefas atribuídas ou disponíveis e desenvolver sua implementação em uma branch própria.
-
----
-
-## 📌 Convenção de desenvolvimento
-
-Antes de iniciar uma implementação:
-
-1. Verificar a Issue correspondente;
-2. Atualizar a branch `develop`;
-3. Criar uma branch específica para a tarefa;
-4. Implementar a funcionalidade;
-5. Realizar os testes necessários;
-6. Fazer commits relacionados à tarefa;
-7. Abrir Pull Request para `develop`;
-8. Revisar a implementação;
-9. Realizar o merge após validação.
-
-Exemplo:
+Se preferir criar o banco do zero:
 
 ```bash
-git checkout develop
-git pull origin develop
-
-git checkout -b feature/nome-da-feature
+python3 manage.py migrate
+python3 manage.py db.sqlite3
+python3 manage.py runserver
 ```
 
----
+### Contas demonstrativas
 
-## 📚 Documentação do projeto
+Todas as contas de demonstração utilizam a senha `Demo@12345`.
 
-Além deste README, o projeto possui documentos de referência utilizados durante o desenvolvimento.
+| Perfil | Usuário | Senha |
+|---|---|---|
+| Administrador do sistema | `demo_admin` | `Demo@12345` |
+| Funcionário administrativo | `demo_funcionario` | `Demo@12345` |
+| Médico | `demo_medico_ana` | `Demo@12345` |
+| Paciente | `demo_paciente_01` | `Demo@12345` |
 
-### Documento de Estrutura e Modelagem
+**Importante:** os dados são exclusivamente fictícios e a senha é pública, destinada apenas à demonstração local. Não utilize essas contas em produção. O arquivo SQLite demonstrativo deve ser tratado como massa de teste, não como banco de produção.
 
-Define as entidades, relacionamentos, cardinalidades e principais regras de negócio do sistema.
 
-Ele funciona como a **fonte de verdade da modelagem** do projeto.
+## Organização por perfil e telas CRUD
 
-### Documento de Arquitetura Django
+A área autenticada agora possui um painel inicial por perfil em `/portal/`, com dados básicos do usuário e links de acesso conforme sua função.
 
-Define como as responsabilidades serão distribuídas dentro do projeto Django, incluindo os aplicativos:
+- Paciente: consulta de horários e histórico de consultas; cada consulta abre detalhes com abas de prontuário, receitas e exames.
+- Médico: agenda própria, cadastro/edição de disponibilidades e solicitação de bloqueios para análise administrativa.
+- Administrador e funcionário: consultas, pacientes, médicos, especialidades, agendas e análise de solicitações; também há listas para prontuários, exames e receitas.
 
-```text
-usuarios
-agenda
-atendimento
-```
-
-A arquitetura foi definida para separar responsabilidades de domínio sem criar um aplicativo específico para cada perfil de usuário.
-
----
-
-## 👨‍💻 Integrantes
-
-| Integrante                 | GitHub     |
-| -------------------------- | ---------- |
-| **[Nome do integrante 1]** | [@usuario] |
-| **[Nome do integrante 2]** | [@usuario] |
-
-Todos os integrantes deverão constar como colaboradores do repositório e realizar pelo menos dois commits durante o desenvolvimento, conforme especificado no enunciado.
-
----
-
-## 📅 Cronograma acadêmico
-
-O projeto será desenvolvido considerando os checkpoints definidos na atividade.
-
-### Checkpoint 1 — 05/11
-
-Entre os itens avaliados estão:
-
-* modelagem completa do banco de dados;
-* ambiente administrativo configurado;
-* sistema de templates do ambiente administrativo;
-* filtros no ambiente administrativo;
-* repositório organizado no GitHub;
-* complexidade do projeto.
-
-### Checkpoint 2 — 19/11
-
-A aplicação deverá estar concluída, contemplando os requisitos definidos no enunciado, incluindo:
-
-* login;
-* logout;
-* cadastro;
-* banco de dados integrado ao ambiente administrativo;
-* framework CSS;
-* interface amigável;
-* documentação;
-* demais funcionalidades previstas no projeto.
-
----
-
-## 🚧 Status atual
-
-### Planejamento
-
-* [x] Definição do domínio do sistema
-* [x] Definição dos perfis de usuário
-* [x] Definição das principais regras de negócio
-* [x] Definição da modelagem conceitual
-* [x] Definição da arquitetura Django
-* [x] Definição inicial da estratégia de branches
-* [x] Criação do projeto Django
-* [x] Configuração do ambiente de desenvolvimento
-* [ ] Configuração do banco de dados
-* [x] Implementação dos usuários
-* [x] Implementação das agendas
-* [ ] Implementação das consultas
-* [x] Implementação dos atendimentos
-* [ ] Implementação do Django Admin
-* [ ] Implementação da interface
-* [ ] Implementação dos dashboards
-* [ ] Testes
-* [ ] Revisão final
-* [ ] Deploy/apresentação
-
----
-
-## 📖 Referência
-
-Projeto desenvolvido para a disciplina:
-
-**GAC116 — Programação Web**
-
-**Trabalho Prático: Projeto de Implementação com Django**
-
-O trabalho possui valor total de 45 pontos e exige o desenvolvimento colaborativo utilizando Django, banco de dados relacional, Git e GitHub.
-
----
-
-> **Nota:** Este README representa o estado inicial do projeto. Conforme decisões técnicas forem tomadas durante a implementação, as informações deverão ser atualizadas para permanecerem alinhadas à documentação de arquitetura e às decisões do grupo.
+As listas usam busca textual e um segundo filtro. As telas genéricas de registro permitem visualizar e, na área administrativa, editar/excluir dados.

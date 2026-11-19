@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Consultas{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><div><h1 class="h2 mb-1">Consultas</h1><p class="text-body-secondary mb-0">Visualize e gerencie os agendamentos da clínica.</p></div><a class="btn btn-primary" href="{% url 'gestao_consulta_nova' %}">+ Nova consulta</a></div>
+<form method="get" class="row g-2 mb-3"><div class="col-md-5"><input class="form-control" name="q" value="{{ termo }}" placeholder="Buscar por paciente ou médico"></div><div class="col-md-3"><select class="form-select" name="status"><option value="">Todos os status</option>{% for value,label in status_choices %}<option value="{{ value }}" {% if status_selecionado == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div><div class="col-auto"><button class="btn btn-outline-primary">Filtrar</button></div><div class="col-auto"><a class="btn btn-outline-secondary" href="{% url 'gestao_consultas' %}">Limpar</a></div></form>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Data e hora</th><th>Paciente</th><th>Médico</th><th>Especialidade</th><th>Status</th><th class="text-end">Ações</th></tr></thead><tbody>
+{% for consulta in consultas %}<tr><td>{{ consulta.data_hora|date:"d/m/Y H:i" }}</td><td>{{ consulta.paciente.usuario.nome }}</td><td>{{ consulta.medico.usuario.nome }}</td><td>{{ consulta.medico.especialidade.nome }}</td><td><span class="badge {% if consulta.status == 'CANCELADA' %}text-bg-danger{% elif consulta.status == 'COMPLETA' %}text-bg-success{% else %}text-bg-primary{% endif %}">{{ consulta.get_status_display }}</span></td><td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-primary" href="{% url 'gestao_consulta_editar' consulta.pk %}">Editar</a> <a class="btn btn-sm btn-outline-danger" href="{% url 'gestao_consulta_excluir' consulta.pk %}">Excluir</a></td></tr>
+{% empty %}<tr><td colspan="6" class="text-center text-body-secondary py-4">Nenhuma consulta encontrada.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

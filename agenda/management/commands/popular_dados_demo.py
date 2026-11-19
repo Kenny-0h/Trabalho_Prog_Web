@@ -4,7 +4,9 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
-from usuarios.models import Usuario, Medico, Paciente
+from usuarios.models import (
+    Usuario, Medico, Paciente, AdministradorSistema, FuncionarioAdministrativo,
+)
 from agenda.models import (
     Especialidade,
     Agenda,
@@ -34,8 +36,8 @@ class Command(BaseCommand):
             },
         )
 
-        if criado:
-            usuario.set_unusable_password()
+        if criado or not usuario.has_usable_password():
+            usuario.set_password("Demo@12345")
             usuario.save(update_fields=["password"])
 
         return usuario
@@ -217,6 +219,39 @@ class Command(BaseCommand):
             )
             pacientes[dados["username"]] = paciente
 
+        # Contas administrativas para demonstrar as telas de gestão.
+        administrativos = [
+            {
+                "username": "demo_admin",
+                "cpf": "90000000021",
+                "nome": "Administrador Demonstração",
+                "email": "admin.demo@example.com",
+                "endereco": "Rua Administrativa, 1",
+                "telefone": "(35) 90000-0021",
+                "nascimento": "1980-01-10",
+                "tipo": Usuario.TipoUsuario.ADMINISTRADOR,
+            },
+            {
+                "username": "demo_funcionario",
+                "cpf": "90000000022",
+                "nome": "Fernanda Recepção",
+                "email": "recepcao.demo@example.com",
+                "endereco": "Rua Administrativa, 2",
+                "telefone": "(35) 90000-0022",
+                "nascimento": "1988-04-20",
+                "tipo": Usuario.TipoUsuario.FUNCIONARIO,
+            },
+        ]
+        for dados in administrativos:
+            usuario = self.criar_usuario(dados)
+            if dados["tipo"] == Usuario.TipoUsuario.ADMINISTRADOR:
+                usuario.is_staff = True
+                usuario.is_superuser = True
+                usuario.save(update_fields=["is_staff", "is_superuser"])
+                AdministradorSistema.objects.get_or_create(usuario=usuario)
+            else:
+                FuncionarioAdministrativo.objects.get_or_create(usuario=usuario)
+
         # Cada médico possui uma única agenda.
         agendas = {}
 
@@ -349,6 +384,27 @@ class Command(BaseCommand):
                 "paciente": "demo_paciente_02",
                 "data": "2026-11-06",
                 "hora": "15:00",
+                "status": Consulta.Status.AGENDADA,
+            },
+            {
+                "medico": "demo_medico_ana",
+                "paciente": "demo_paciente_04",
+                "data": "2026-11-20",
+                "hora": "08:30",
+                "status": Consulta.Status.AGENDADA,
+            },
+            {
+                "medico": "demo_medico_bruno",
+                "paciente": "demo_paciente_01",
+                "data": "2026-11-23",
+                "hora": "09:00",
+                "status": Consulta.Status.CONFIRMADA,
+            },
+            {
+                "medico": "demo_medico_diego",
+                "paciente": "demo_paciente_05",
+                "data": "2026-11-25",
+                "hora": "10:00",
                 "status": Consulta.Status.AGENDADA,
             },
         ]

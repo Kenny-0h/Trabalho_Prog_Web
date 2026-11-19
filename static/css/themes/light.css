@@ -1,0 +1,18 @@
+:root,
+[data-bs-theme="light"] {
+    --am-bg-page: #f5f7f5;
+    --am-bg-surface: #ffffff;
+    --am-text-primary: #1f2d25;
+    --am-text-muted: #65736a;
+    --am-brand-primary: #21804f;
+    --am-brand-accent: #e8f4ec;
+    --am-border-color: #e1e8e2;
+    --am-card-shadow: 0 2px 8px rgba(27, 55, 37, 0.045);
+    --bs-primary: #21804f;
+    --bs-primary-rgb: 33, 128, 79;
+    --bs-success: #21804f;
+    --bs-success-rgb: 33, 128, 79;
+    --bs-link-color: #1c7145;
+    --bs-link-color-rgb: 28, 113, 69;
+    --bs-link-hover-color: #155938;
+}
