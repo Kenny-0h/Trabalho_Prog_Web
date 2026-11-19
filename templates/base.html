@@ -1,27 +1,60 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+{% load static %}
+<!doctype html>
+<html lang="pt-br" data-bs-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Agendamento</title>
-    <!-- Adicionando Bootstrap via CDN para um visual decente sem esforço -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Sistema de gerenciamento de agendamentos médicos">
+    <title>{% block title %}AgendaMedica{% endblock %} | AgendaMedica</title>
+    <script>
+        (() => {
+            const temaSalvo = localStorage.getItem("agendamedica-tema") || "light";
+            document.documentElement.setAttribute("data-bs-theme", temaSalvo);
+        })();
+    </script>
+    <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/themes/light.css' %}" rel="stylesheet">
+    <link href="{% static 'css/themes/dark.css' %}" rel="stylesheet">
+    <link href="{% static 'css/themes/custom.css' %}" rel="stylesheet">
+    <link href="{% static 'css/site.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">Clínica Web</a>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg border-bottom bg-body sticky-top">
+        <div class="container-fluid app-container">
+            <a class="navbar-brand fw-bold" href="{% if user.is_authenticated %}{% url 'portal_home' %}{% else %}{% url 'login' %}{% endif %}"><span class="brand-mark me-2" aria-hidden="true">+</span>AgendaMedica</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPrincipal" aria-controls="navbarPrincipal" aria-expanded="false" aria-label="Abrir navegação"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarPrincipal">
+                {% if user.is_authenticated %}<ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="{% url 'portal_home' %}">Área de trabalho</a></li>{% if user.tipo_usuario == 'ADMINISTRADOR' or user.tipo_usuario == 'FUNCIONARIO' %}<li class="nav-item"><a class="nav-link" href="{% url 'gestao_inicio' %}">Gestão da clínica</a></li>{% endif %}</ul>{% endif %}
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <li class="nav-item"><button class="btn btn-outline-secondary btn-sm theme-toggle" id="alternarTema" type="button" aria-label="Alternar tema"><svg id="iconeTema" class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.3A8.5 8.5 0 0 1 8.7 3.8 8.5 8.5 0 1 0 20.2 15.3Z"/></svg><span id="textoTema">Tema escuro</span></button></li>
+                    {% if user.is_authenticated %}<li class="nav-item"><a class="nav-link" href="{% url 'meu_perfil' %}">{{ user.nome|default:user.username }}</a></li><li class="nav-item"><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn btn-outline-secondary btn-sm" type="submit">Sair</button></form></li>{% else %}<li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Entrar</a></li><li class="nav-item"><a class="btn btn-success btn-sm" href="{% url 'cadastro' %}">Criar conta</a></li>{% endif %}
+                </ul>
+            </div>
         </div>
     </nav>
 
-    <main class="container mt-4">
-        <!-- Aqui é onde as outras telas serão injetadas -->
-        {% block content %}
-        {% endblock %}
+    <main class="container-fluid app-container flex-grow-1 py-4 py-lg-5">
+        {% if messages %}
+            <div class="messages mb-4" aria-live="polite">
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
     </main>
 
-    <footer class="text-center mt-5 mb-3 text-muted">
-        <small>&copy; 2026 Trabalho de Programação Web</small>
+    <footer class="border-top py-4 mt-auto">
+        <div class="container-fluid app-container text-center text-body-secondary small">
+            &copy; 2026 AgendaMedica · Sistema de gerenciamento de agendamentos médicos
+        </div>
     </footer>
+    <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/theme.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

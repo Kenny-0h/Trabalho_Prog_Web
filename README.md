@@ -1,64 +1,92 @@
-# Sistema de Gerenciamento de Agendamento Médico
+# AgendaMedica — Sistema de Gerenciamento de Agendamento Médico
 
-Aplicação em desenvolvimento para apoiar o gerenciamento de uma clínica médica, como parte do Trabalho Prático da disciplina **GAC116 — Programação Web**. O projeto utiliza Python e Django e organiza os dados em três aplicativos: `usuarios`, `agenda` e `atendimento`.
+Aplicação web desenvolvida para apoiar o gerenciamento de uma clínica médica, como parte do Trabalho Prático da disciplina **GAC116 — Programação Web**, da Universidade Federal de Lavras (UFLA).
 
-## Visão geral
+O sistema foi desenvolvido em Python com Django, utilizando a arquitetura MVT e três aplicativos principais: `usuarios`, `agenda` e `atendimento`.
 
-O domínio do sistema envolve quatro perfis de usuário:
+## Equipe
 
-- **Paciente:** pessoa atendida pela clínica.
-- **Médico:** profissional associado a uma especialidade e a uma agenda.
-- **Funcionário administrativo:** pessoa que apoia a operação da clínica.
-- **Administrador do sistema:** perfil administrativo com responsabilidade geral sobre o sistema.
+> **Integrantes:** preencher com os nomes dos integrantes do grupo.
 
-O objetivo do projeto é estruturar os dados e os processos relacionados a usuários, agendas médicas, consultas e registros de atendimento. A implementação atual está em uma etapa inicial: os modelos de domínio e suas configurações no Django Admin estão presentes, mas a interface própria para os usuários finais e os fluxos completos de negócio ainda não foram implementados.
+## Tecnologias utilizadas
 
-## Aplicativos Django
+- **Python 3.10 ou superior**
+- **Django 5.2.17**
+- **Django Jazzmin 3.0.5**, para personalização do Django Admin
+- **SQLite 3**, banco de dados relacional utilizado por padrão
+- **HTML5, CSS3 e JavaScript**
+- **Bootstrap 5.3**, para os componentes e a responsividade da interface
+- **Git e GitHub**, para controle de versão
 
-| Aplicativo | Responsabilidade atual |
+## Funcionalidades
+
+O sistema contempla quatro perfis de usuário, com áreas e permissões distintas:
+
+- **Paciente:** cadastro, autenticação, acesso ao portal, consulta de disponibilidades e visualização de suas consultas e respectivos registros clínicos.
+- **Médico:** acesso à própria agenda, gerenciamento de disponibilidades e solicitação de bloqueios ou alterações de agenda.
+- **Funcionário administrativo:** gerenciamento de pacientes, médicos, agendas e consultas, além da análise de solicitações administrativas.
+- **Administrador do sistema:** acesso administrativo ampliado, incluindo o gerenciamento de usuários e configurações pelo Django Admin.
+
+Entre as funcionalidades implementadas estão:
+
+- autenticação, logout e cadastro público de pacientes;
+- redirecionamento e controle de acesso conforme o perfil;
+- gestão de pacientes e médicos;
+- cadastro e manutenção de especialidades;
+- agendas médicas, disponibilidades e bloqueios de horários;
+- gerenciamento de consultas e seus estados;
+- registros clínicos associados às consultas, incluindo prontuários, exames e receitas;
+- painel administrativo personalizado com Jazzmin;
+- interface com tema claro e escuro.
+
+## Organização dos aplicativos
+
+| Aplicativo | Responsabilidade |
 |---|---|
-| [`usuarios`](docs/usuarios.md) | Usuário personalizado, dados pessoais e perfis de paciente, médico, funcionário e administrador. |
-| [`agenda`](docs/agenda.md) | Especialidades, agendas médicas, disponibilidades recorrentes e bloqueios de agenda. |
-| [`atendimento`](docs/atendimento.md) | Consultas, prontuários, exames e receitas. |
+| `usuarios` | Modelo de usuário personalizado, perfis, autenticação, formulários, permissões, portal e telas de gestão. |
+| `agenda` | Especialidades, agendas médicas, disponibilidades recorrentes e bloqueios de agenda. |
+| `atendimento` | Consultas, prontuários, exames e receitas. |
 
-
-## Tecnologias
-
-- Python
-- Django 5.2.17
-- Django Jazzmin 3.0.5, para personalização visual do Django Admin
-- SQLite, banco de dados configurado atualmente
-- HTML, CSS e JavaScript (estrutura de diretórios preparada; interface própria ainda não implementada)
-- Git e GitHub
-
-As dependências Python estão listadas em [`requirements.txt`](requirements.txt).
+A documentação técnica dos modelos e relacionamentos está disponível em [`docs/`](docs/).
 
 ## Estrutura do projeto
 
 ```text
 Trabalho_Prog_Web/
-├── config/                 # Configurações gerais do Django
-├── usuarios/               # Usuários e perfis
-├── agenda/                 # Especialidades e organização das agendas
+├── config/                 # Configurações globais do Django
+├── usuarios/               # Usuários, perfis, autenticação e permissões
+├── agenda/                 # Especialidades, agendas e disponibilidades
 ├── atendimento/            # Consultas e registros clínicos
-├── docs/                   # Documentação do projeto
+├── docs/                   # Documentação técnica e DER
 ├── scripts/
-│   └── iniciar.sh          # Preparação do ambiente e inicialização local
-├── static/                 # Arquivos estáticos
-├── templates/              # Templates compartilhados
-├── manage.py
-└── requirements.txt
+│   └── iniciar.sh          # Preparação do ambiente e inicialização (Linux/macOS)
+├── static/
+│   ├── css/                # Estilos da aplicação e temas
+│   └── js/                 # JavaScript da interface
+├── templates/              # Templates HTML
+├── banco_demo.sqlite3      # Banco separado com dados fictícios para demonstração
+├── db.sqlite3              # Banco SQLite utilizado por padrão no projeto
+├── manage.py               # Utilitário de gerenciamento do Django
+└── requirements.txt        # Dependências Python
 ```
 
-## Como executar localmente
+## Requisitos
 
-### Pré-requisitos
+Antes de executar o projeto, tenha instalado:
 
-- Python 3.10 ou superior (recomendado para este projeto).
-- `venv` disponível na instalação do Python.
-- Acesso à internet na primeira instalação das dependências.
+- Python 3.10 ou superior;
+- `pip`, para instalar as dependências;
+- `venv`, para criar o ambiente virtual.
 
-### Inicialização rápida — Linux/macOS
+No Ubuntu/Pop!_OS, caso o módulo `venv` não esteja instalado, execute:
+
+```bash
+sudo apt install python3-venv
+```
+
+## Instalação e execução
+
+### Opção 1 — Linux ou macOS: script de inicialização
 
 Na raiz do projeto, execute:
 
@@ -67,69 +95,129 @@ chmod +x scripts/iniciar.sh
 ./scripts/iniciar.sh
 ```
 
-O script cria o ambiente virtual `.venv` caso ainda não exista, instala as dependências, aplica as migrações, executa `manage.py check` e inicia o servidor em `http://127.0.0.1:8000/`.
+O script cria o ambiente virtual `.venv` caso ele ainda não exista, instala as dependências de `requirements.txt`, aplica as migrações, verifica a configuração do Django e inicia o servidor local em `http://127.0.0.1:8000/`.
 
-### Inicialização manual
+### Opção 2 — Instalação manual
+
+Na raiz do projeto, execute os comandos abaixo.
+
+**1. Criar o ambiente virtual:**
 
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python manage.py migrate
-python manage.py check
-python manage.py runserver
 ```
 
-Para acessar o ambiente administrativo, abra `http://127.0.0.1:8000/admin/`.
+**2. Ativar o ambiente virtual:**
 
-Na primeira execução, crie um usuário administrador em outro terminal, com o ambiente virtual ativado:
+Linux ou macOS:
+
+```bash
+source .venv/bin/activate
+```
+
+Windows (PowerShell):
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+**3. Instalar as dependências:**
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+**4. Aplicar as migrações do banco de dados:**
+
+```bash
+python manage.py migrate
+```
+
+**5. (Opcional) Criar um usuário administrador:**
 
 ```bash
 python manage.py createsuperuser
 ```
 
-O banco configurado atualmente é SQLite. O arquivo `db.sqlite3` é criado na raiz do projeto quando as migrações são aplicadas; não é necessário compartilhar um banco de dados preenchido para iniciar a aplicação.
+Siga as instruções do terminal para informar nome de usuário, e-mail e senha.
 
-## Funcionalidades presentes no código
+**6. Iniciar o servidor:**
 
-- Modelo de usuário personalizado baseado em `AbstractUser`.
-- Tipos de usuário para paciente, médico, funcionário administrativo e administrador do sistema.
-- Perfis relacionados individualmente ao usuário.
-- Cadastro transacional de usuário com perfil por meio do serviço `criar_usuario_com_perfil`.
-- Cadastro de especialidades e associação de médicos a especialidades.
-- Uma agenda por médico e disponibilidades recorrentes por dia da semana.
-- Bloqueios de agenda com tipo e status.
-- Modelo de consulta com estados definidos e restrição para impedir dois registros do mesmo médico no mesmo horário.
-- Prontuário associado individualmente a uma consulta, com exames e receitas.
-- Configuração do Django Jazzmin e telas de administração dos modelos.
-- Testes automatizados nos três aplicativos.
+```bash
+python manage.py runserver
+```
 
-## O que ainda está em desenvolvimento
+A aplicação ficará disponível em:
 
-Na versão analisada, as rotas do projeto apontam somente para o Django Admin. Os arquivos `views.py` dos aplicativos ainda contêm estruturas iniciais, e não há `urls.py` próprios para os aplicativos. Portanto, ainda não estão disponíveis uma interface de agendamento para pacientes, dashboards por perfil, nem fluxos completos de autenticação e autorização fora do Admin.
+- Site: http://127.0.0.1:8000/
+- Django Admin: http://127.0.0.1:8000/admin/
 
-Também não se deve interpretar a existência de um campo `tipo_usuario` como implementação completa de permissões por perfil. As regras de autorização e os fluxos de negócio precisam ser implementados e testados nas próximas etapas.
+Para encerrar o servidor, pressione `Ctrl+C` no terminal.
 
-Para executar os testes automatizados:
+## Banco de dados
+
+O projeto utiliza **SQLite**. A configuração em `config/settings.py` define `db.sqlite3`, localizado na raiz do projeto, como banco de dados padrão.
+
+O repositório também contém `banco_demo.sqlite3`, um banco separado com registros fictícios para demonstração.
+
+### Usar o banco padrão do projeto
+
+Com as dependências instaladas, execute:
+
+```bash
+python manage.py migrate
+```
+
+Esse comando aplica as migrações pendentes no banco `db.sqlite3`.
+
+### Usar o banco de demonstração
+
+Se quiser iniciar com os dados fictícios, faça uma cópia do banco de demonstração para o nome esperado pela configuração do Django. Na raiz do projeto:
+
+Linux ou macOS:
+
+```bash
+cp banco_demo.sqlite3 db.sqlite3
+```
+
+Windows (PowerShell):
+
+```powershell
+Copy-Item banco_demo.sqlite3 db.sqlite3
+```
+
+**Atenção:** esses comandos substituem o arquivo `db.sqlite3` caso ele já exista. Se quiser preservar seu banco atual, faça uma cópia de segurança antes.
+
+### Contas demonstrativas
+
+As contas abaixo estão disponíveis no banco `banco_demo.sqlite3`. Todas utilizam a senha `Demo@12345`.
+
+| Perfil | Usuário | Senha |
+|---|---|---|
+| Administrador do sistema | `demo_admin` | `Demo@12345` |
+| Funcionário administrativo | `demo_funcionario` | `Demo@12345` |
+| Médico | `demo_medico_ana` | `Demo@12345` |
+| Paciente | `demo_paciente_01` | `Demo@12345` |
+
+Os dados são fictícios e destinados somente à demonstração local. Não utilize essas contas em produção.
+
+## Testes
+
+Para executar os testes automatizados dos aplicativos:
 
 ```bash
 python manage.py test
 ```
 
-## Integrantes
+Para verificar a configuração do projeto:
 
-| Integrante | GitHub |
-|---|---|
-| Luís Kennedy Gervásio Turola | @Kenny-0h |
-| Milena de Lourdes Barbosa| @MilenaBarbosa23 |
+```bash
+python manage.py check
+```
 
-## Disciplina
+## Observações de segurança
 
-**GAC116 — Programação Web**  
-Trabalho Prático: Projeto de Implementação com Django.
+As configurações presentes no projeto são voltadas ao desenvolvimento local. Antes de publicar a aplicação em produção, é necessário, entre outras medidas, configurar uma `SECRET_KEY` segura fora do código, desativar `DEBUG`, definir `ALLOWED_HOSTS` adequadamente e revisar as configurações de segurança do Django.
 
-## Documentação por aplicativo
-
-- [Aplicativo `usuarios`](docs/usuarios.md)
-- [Aplicativo `agenda`](docs/agenda.md)
-- [Aplicativo `atendimento`](docs/atendimento.md)
+O banco SQLite de demonstração contém somente dados fictícios. Não utilize dados pessoais ou clínicos reais nesse banco.

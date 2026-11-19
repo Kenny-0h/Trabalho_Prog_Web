@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Médicos{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><div><h1 class="h2 mb-1">Médicos</h1><p class="text-body-secondary mb-0">Profissionais, especialidades e agendas vinculadas.</p></div><a class="btn btn-primary" href="{% url 'gestao_medico_novo' %}">+ Novo médico</a></div>
+<form class="row g-2 mb-3" method="get"><div class="col-md-5"><input class="form-control" name="q" value="{{ termo }}" placeholder="Buscar por nome, CRM ou especialidade"></div><div class="col-auto"><button class="btn btn-outline-primary">Buscar</button></div><div class="col-auto"><a class="btn btn-outline-secondary" href="{% url 'gestao_medicos' %}">Limpar</a></div></form>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>Médico</th><th>CRM</th><th>Especialidade</th><th>E-mail</th><th class="text-end">Ações</th></tr></thead><tbody>
+{% for medico in medicos %}<tr><td class="fw-semibold">{{ medico.usuario.nome }}</td><td>{{ medico.crm }}</td><td>{{ medico.especialidade.nome }}</td><td>{{ medico.usuario.email }}</td><td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-primary" href="{% url 'gestao_medico_editar' medico.pk %}">Editar</a> {% if user.tipo_usuario == 'ADMINISTRADOR' %}<a class="btn btn-sm btn-outline-danger" href="{% url 'gestao_medico_excluir' medico.pk %}">Excluir</a>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="5" class="text-center text-body-secondary py-4">Nenhum médico encontrado.</td></tr>{% endfor %}
+</tbody></table></div></div><p class="small text-body-secondary mt-2">{{ medicos|length }} registro(s) exibido(s).</p>
+{% endblock %}

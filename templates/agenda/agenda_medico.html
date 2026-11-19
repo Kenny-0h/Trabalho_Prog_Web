@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Minha agenda{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><h1 class="h2 mb-1">Minha agenda</h1><p class="text-body-secondary mb-0">Gerencie suas disponibilidades e envie solicitações à administração.</p></div>
+    <span class="badge text-bg-primary">{{ request.user.get_tipo_usuario_display }}</span>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-lg-6"><section class="card h-100"><div class="card-body">
+        <h2 class="h5">Cadastrar disponibilidade</h2><p class="small text-body-secondary">Informe um período semanal recorrente em que você atende.</p>
+        <form method="post" action="{% url 'medico_disponibilidade_nova' %}">{% csrf_token %}
+            {% for field in form_disponibilidade %}<div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}</div>{% endfor %}
+            <button class="btn btn-primary">Adicionar horário</button>
+        </form>
+    </div></section></div>
+    <div class="col-lg-6"><section class="card h-100"><div class="card-body">
+        <h2 class="h5">Solicitar alteração de horário</h2><p class="small text-body-secondary">A alteração só será aplicada após aprovação administrativa.</p>
+        <form method="post" action="{% url 'medico_solicitar_alteracao' %}">{% csrf_token %}
+            {% for field in form_alteracao %}<div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}{% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}</div>{% endfor %}
+            <button class="btn btn-outline-primary">Enviar solicitação</button>
+        </form>
+    </div></section></div>
+</div>
+<section class="card mb-4"><div class="card-body">
+    <h2 class="h5 mb-3">Solicitar bloqueio de horário</h2><p class="small text-body-secondary">Use para informar ausência, férias ou outro período em que não poderá atender. O bloqueio fica pendente até análise da administração.</p>
+    <form method="post" action="{% url 'medico_solicitar_bloqueio' %}">{% csrf_token %}<div class="row g-3">
+        {% for field in form_bloqueio %}<div class="col-md-6"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}</div>{% endfor %}
+    </div><button class="btn btn-outline-danger mt-3">Enviar solicitação de bloqueio</button></form>
+</div></section>
+<div class="row g-3">
+    <div class="col-lg-6"><section class="card h-100"><div class="card-body"><h2 class="h5">Meus horários recorrentes</h2>
+        {% for item in disponibilidades %}<div class="d-flex justify-content-between border-top py-2"><span>{{ item.get_dia_semana_display }}</span><strong>{{ item.horario_inicio|time:"H:i" }}–{{ item.horario_fim|time:"H:i" }}</strong></div>{% empty %}<p class="text-body-secondary mb-0">Nenhuma disponibilidade cadastrada.</p>{% endfor %}
+    </div></section></div>
+    <div class="col-lg-6"><section class="card h-100"><div class="card-body"><h2 class="h5">Solicitações de alteração</h2>
+        {% for item in solicitacoes %}<div class="border-top py-2"><div class="d-flex justify-content-between gap-2"><strong>{{ item.get_dia_semana_display }} · {{ item.horario_inicio|time:"H:i" }}–{{ item.horario_fim|time:"H:i" }}</strong><span class="badge {% if item.status == 'APROVADA' %}text-bg-success{% elif item.status == 'REJEITADA' %}text-bg-danger{% else %}text-bg-warning{% endif %}">{{ item.get_status_display }}</span></div><div class="small text-body-secondary">{{ item.justificativa }}</div></div>{% empty %}<p class="text-body-secondary mb-0">Nenhuma solicitação enviada.</p>{% endfor %}
+    </div></section></div>
+</div>
+<section class="card mt-3"><div class="card-body"><h2 class="h5">Bloqueios solicitados</h2>
+    {% for item in bloqueios %}<div class="d-flex flex-wrap justify-content-between border-top py-2 gap-2"><span>{{ item.data_hora_inicio|date:"d/m/Y H:i" }}–{{ item.data_hora_fim|date:"d/m/Y H:i" }} · {{ item.get_tipo_display }} <span class="small text-body-secondary">{{ item.justificativa }}</span></span><span class="badge {% if item.status == 'APROVADO' %}text-bg-success{% elif item.status == 'REJEITADO' %}text-bg-danger{% else %}text-bg-warning{% endif %}">{{ item.get_status_display }}</span></div>{% empty %}<p class="text-body-secondary mb-0">Nenhum bloqueio solicitado.</p>{% endfor %}
+</div></section>
+<section class="card mt-3"><div class="card-body"><h2 class="h5">Minhas próximas consultas</h2>
+    {% for consulta in consultas %}<div class="d-flex flex-wrap justify-content-between border-top py-2 gap-2"><span>{{ consulta.data_hora|date:"d/m/Y H:i" }} · {{ consulta.paciente.usuario.nome }}</span><span class="badge text-bg-secondary">{{ consulta.get_status_display }}</span></div>{% empty %}<p class="text-body-secondary mb-0">Nenhuma consulta cadastrada.</p>{% endfor %}
+</div></section>
+{% endblock %}

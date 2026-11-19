@@ -2,12 +2,29 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from .models import (
-    Usuario,
-    Paciente,
-    Medico,
-    FuncionarioAdministrativo,
     AdministradorSistema,
+    FuncionarioAdministrativo,
+    Medico,
+    Paciente,
+    Usuario,
 )
+
+
+def eh_admin_sistema(user):
+    return bool(
+        user.is_authenticated
+        and (
+            user.is_superuser
+            or getattr(user, "tipo_usuario", None) == Usuario.TipoUsuario.ADMINISTRADOR
+        )
+    )
+
+
+def eh_funcionario_clinica(user):
+    return bool(
+        user.is_authenticated
+        and getattr(user, "tipo_usuario", None) == Usuario.TipoUsuario.FUNCIONARIO
+    )
 
 
 class PerfilInlineBase(admin.StackedInline):
@@ -97,16 +114,94 @@ class UsuarioAdmin(UserAdmin):
         AdministradorInline,
     )
 
+    def has_module_permission(self, request):
+        return eh_admin_sistema(request.user) or eh_funcionario_clinica(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return eh_admin_sistema(request.user) or eh_funcionario_clinica(request.user)
+
+    def has_add_permission(self, request):
+        return eh_admin_sistema(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        if eh_admin_sistema(request.user):
+            return True
+        if eh_funcionario_clinica(request.user):
+            if obj is None:
+                return True
+            return obj.tipo_usuario == Usuario.TipoUsuario.PACIENTE
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return eh_admin_sistema(request.user)
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly = list(super().get_readonly_fields(request, obj))
+        if not eh_admin_sistema(request.user):
+            readonly.extend([
+                "is_superuser",
+                "is_staff",
+                "groups",
+                "user_permissions",
+                "tipo_usuario",
+                "last_login",
+                "date_joined",
+            ])
+        return tuple(dict.fromkeys(readonly))
+
+    def get_inlines(self, request, obj=None):
+        if eh_admin_sistema(request.user):
+            return self.inlines
+        if eh_funcionario_clinica(request.user):
+            return (PacienteInline,)
+        return ()
+
 
 @admin.register(Paciente)
 class PacienteAdmin(admin.ModelAdmin):
     list_display = ("usuario", "plano_medico")
+    list_filter = ("plano_medico",)
     search_fields = ("usuario__nome", "usuario__cpf", "plano_medico")
+    ordering = ("usuario__nome",)
     autocomplete_fields = ("usuario",)
+
+    def has_module_permission(self, request):
+        return eh_admin_sistema(request.user) or eh_funcionario_clinica(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return eh_admin_sistema(request.user) or eh_funcionario_clinica(request.user)
+
+    def has_add_permission(self, request):
+        return eh_admin_sistema(request.user) or eh_funcionario_clinica(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return eh_admin_sistema(request.user) or eh_funcionario_clinica(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return eh_admin_sistema(request.user)
+
+
+class PerfilRestritoAdminBase(admin.ModelAdmin):
+    """Restringe criação, edição e exclusão de perfis internos ao Administrador do Sistema."""
+
+    def has_module_permission(self, request):
+        return eh_admin_sistema(request.user) or eh_funcionario_clinica(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return eh_admin_sistema(request.user) or eh_funcionario_clinica(request.user)
+
+    def has_add_permission(self, request):
+        return eh_admin_sistema(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return eh_admin_sistema(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return eh_admin_sistema(request.user)
 
 
 @admin.register(Medico)
-class MedicoAdmin(admin.ModelAdmin):
+class MedicoAdmin(PerfilRestritoAdminBase):
     list_display = ("usuario", "crm", "rqe", "especialidade")
     list_filter = ("especialidade",)
     search_fields = (
@@ -116,18 +211,23 @@ class MedicoAdmin(admin.ModelAdmin):
         "rqe",
         "especialidade__nome",
     )
+    ordering = ("usuario__nome",)
     autocomplete_fields = ("usuario", "especialidade")
 
 
 @admin.register(FuncionarioAdministrativo)
-class FuncionarioAdministrativoAdmin(admin.ModelAdmin):
+class FuncionarioAdministrativoAdmin(PerfilRestritoAdminBase):
     list_display = ("usuario",)
+    list_filter = ("usuario__is_active",)
     search_fields = ("usuario__nome", "usuario__cpf")
+    ordering = ("usuario__nome",)
     autocomplete_fields = ("usuario",)
 
 
 @admin.register(AdministradorSistema)
-class AdministradorSistemaAdmin(admin.ModelAdmin):
+class AdministradorSistemaAdmin(PerfilRestritoAdminBase):
     list_display = ("usuario",)
+    list_filter = ("usuario__is_active",)
     search_fields = ("usuario__nome", "usuario__cpf")
+    ordering = ("usuario__nome",)
     autocomplete_fields = ("usuario",)

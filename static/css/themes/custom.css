@@ -1,0 +1,18 @@
+/* Espaço reservado para futuros temas (ex.: [data-bs-theme="high-contrast"])
+   sem necessidade de reescrever a lógica de alternância no JavaScript. */
+body {
+    background-color: var(--am-bg-page);
+    color: var(--am-text-primary);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.card,
+.navbar,
+footer {
+    background-color: var(--am-bg-surface) !important;
+    border-color: var(--am-border-color) !important;
+}
+
+.card {
+    box-shadow: var(--am-card-shadow);
+}
